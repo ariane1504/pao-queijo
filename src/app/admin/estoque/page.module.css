@@ -1,0 +1,207 @@
+.body {
+  min-height: 100vh;
+  background: #f4f6f9;
+}
+
+/* HEADER */
+
+.header {
+
+  background: linear-gradient(
+    135deg,
+    #1565c0,
+    #42a5f5
+  );
+
+  color: white;
+
+  padding: 25px;
+
+  border-radius: 22px;
+
+  margin-bottom: 25px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+/* CARD */
+
+.card {
+
+  background: white;
+
+  padding: 22px;
+
+  border-radius: 22px;
+
+  margin-bottom: 20px;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+/* INPUT */
+
+.input {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border-radius: 14px;
+
+  border: 1px solid #ccc;
+
+  margin-top: 12px;
+
+  font-size: 15px;
+
+}
+
+/* BUTTON */
+
+.button {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #1565c0;
+
+  color: white;
+
+  margin-top: 14px;
+
+  cursor: pointer;
+
+  font-weight: bold;
+
+}
+
+.button:hover {
+  background: #0d47a1;
+}
+
+/* GRID */
+
+.grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(280px, 1fr));
+
+  gap: 20px;
+
+}
+
+/* PRODUTO */
+
+.produto {
+
+  background: white;
+
+  padding: 20px;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+/* TOPO */
+
+.topo {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+}
+
+.topo h3 {
+  margin: 0;
+}
+
+.topo p {
+
+  margin-top: 6px;
+
+  color: #666;
+
+}
+
+/* INFO */
+
+.info {
+
+  margin-top: 20px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+}
+
+/* QTD */
+
+.quantidade {
+
+  width: 90px;
+
+  padding: 10px;
+
+  border-radius: 10px;
+
+  border: 1px solid #ccc;
+
+}
+
+/* REMOVER */
+
+.remover {
+
+  border: none;
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: 12px;
+
+  background: #ef5350;
+
+  color: white;
+
+  cursor: pointer;
+
+}
+
+.remover:hover {
+  background: #d32f2f;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .info {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+  }
+
+}

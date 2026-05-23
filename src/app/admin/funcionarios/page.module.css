@@ -1,0 +1,220 @@
+.body {
+  min-height: 100vh;
+  background: #f4f6f9;
+}
+
+/* HEADER */
+
+.header {
+
+  background: linear-gradient(
+    135deg,
+    #6a1b9a,
+    #ab47bc
+  );
+
+  color: white;
+
+  padding: 25px;
+
+  border-radius: 22px;
+
+  margin-bottom: 25px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+/* CARD */
+
+.card {
+
+  background: white;
+
+  padding: 22px;
+
+  border-radius: 22px;
+
+  margin-bottom: 20px;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+/* INPUT */
+
+.input {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border-radius: 14px;
+
+  border: 1px solid #ccc;
+
+  margin-top: 12px;
+
+  font-size: 15px;
+
+}
+
+/* BUTTON */
+
+.button {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #6a1b9a;
+
+  color: white;
+
+  margin-top: 14px;
+
+  cursor: pointer;
+
+  font-weight: bold;
+
+}
+
+.button:hover {
+  background: #4a148c;
+}
+
+/* LISTA */
+
+.lista {
+
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+}
+
+/* ITEM */
+
+.item {
+
+  background: white;
+
+  padding: 20px;
+
+  border-radius: 20px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+/* INFO */
+
+.info {
+
+  display: flex;
+  gap: 20px;
+
+  flex: 1;
+
+}
+
+.info div {
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+}
+
+.info label {
+
+  margin-bottom: 8px;
+
+  font-weight: bold;
+
+}
+
+/* INPUT EDIT */
+
+.inputEdit {
+
+  width: 100%;
+
+  padding: 12px;
+
+  border-radius: 12px;
+
+  border: 1px solid #ccc;
+
+}
+
+/* REMOVER */
+
+.remover {
+
+  border: none;
+
+  width: 45px;
+  height: 45px;
+
+  border-radius: 12px;
+
+  background: #ef5350;
+
+  color: white;
+
+  cursor: pointer;
+
+  margin-left: 15px;
+
+}
+
+.remover:hover {
+  background: #c62828;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .item {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 15px;
+
+  }
+
+  .info {
+
+    flex-direction: column;
+
+    width: 100%;
+
+  }
+
+  .remover {
+
+    width: 100%;
+
+    margin-left: 0;
+
+  }
+
+}

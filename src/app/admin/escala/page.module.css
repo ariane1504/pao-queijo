@@ -1,0 +1,249 @@
+.body {
+  min-height: 100vh;
+  background: #f4f6f9;
+}
+
+/* HEADER */
+
+.header {
+
+  background: linear-gradient(
+    135deg,
+    #5e35b1,
+    #7e57c2
+  );
+
+  color: white;
+
+  padding: 25px;
+  border-radius: 22px;
+
+  margin-bottom: 25px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+/* CARD */
+
+.card {
+
+  background: white;
+
+  padding: 22px;
+  border-radius: 22px;
+
+  margin-bottom: 20px;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+/* INPUT */
+
+.input {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border-radius: 14px;
+
+  border: 1px solid #ccc;
+
+  margin-top: 12px;
+
+}
+
+/* BUTTON */
+
+.button {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #43a047;
+
+  color: white;
+
+  margin-top: 12px;
+
+  cursor: pointer;
+
+}
+
+.button:hover {
+  background: #388e3c;
+}
+
+/* TOPO */
+
+.topo {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+}
+
+.acoes {
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+}
+
+.porcentagem {
+
+  background: #5e35b1;
+  color: white;
+
+  padding: 10px 14px;
+
+  border-radius: 14px;
+
+  font-weight: bold;
+}
+
+/* PROGRESSO */
+
+.progresso {
+
+  width: 100%;
+  height: 12px;
+
+  background: #ddd;
+
+  border-radius: 20px;
+
+  margin-top: 18px;
+
+  overflow: hidden;
+
+}
+
+.barra {
+
+  height: 12px;
+
+  background: #43a047;
+
+  border-radius: 20px;
+
+}
+
+/* LISTA */
+
+.lista {
+  margin-top: 20px;
+}
+
+/* ITEM */
+
+.item {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  background: #fafafa;
+
+  border-radius: 14px;
+
+  margin-bottom: 12px;
+
+}
+
+.label {
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+}
+
+.label input {
+
+  width: 20px;
+  height: 20px;
+
+}
+
+/* REMOVER */
+
+.remover,
+.removerFunc {
+
+  border: none;
+
+  background: #ef5350;
+  color: white;
+
+  width: 40px;
+  height: 40px;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+}
+
+.remover:hover,
+.removerFunc:hover {
+  background: #d32f2f;
+}
+
+/* TEXTAREA */
+
+.textarea {
+
+  width: 100%;
+
+  min-height: 100px;
+
+  margin-top: 18px;
+
+  border-radius: 16px;
+
+  border: 1px solid #ccc;
+
+  padding: 14px;
+
+  resize: none;
+
+  font-size: 15px;
+
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 700px) {
+
+  .topo {
+
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+
+  }
+
+  .item {
+
+    flex-direction: column;
+    align-items: flex-start;
+
+  }
+
+}

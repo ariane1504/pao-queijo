@@ -1,66 +1,327 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import styles from "./page.module.css";
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
+export default function Login() {
+
+  // ===== USUÁRIOS =====
+  const usuarios = {
+
+    admin: {
+      senha: "123",
+      funcao: "admin",
+      nome: "Administrador"
+    },
+
+    diandres: {
+      senha: "123",
+      funcao: "atendente",
+      nome: "Diandres"
+    },
+
+    leidi: {
+      senha: "123",
+      funcao: "atendente",
+      nome: "Leidi"
+    },
+
+    lenir: {
+      senha: "123",
+      funcao: "atendente",
+      nome: "Lenir"
+    },
+
+    karla: {
+      senha: "123",
+      funcao: "padeiro",
+      nome: "Carlos"
+    }
+
+  };
+
+  // ===== STATES =====
+  const [usuario, setUsuario] =
+    useState("");
+
+  const [senha, setSenha] =
+    useState("");
+
+  const [dadosUsuario,
+  setDadosUsuario] =
+    useState(null);
+
+  // ===== LOGIN =====
+  function entrar() {
+
+    const user =
+      usuario
+        .trim()
+        .toLowerCase();
+
+    if (
+      usuarios[user] &&
+      usuarios[user].senha === senha
+    ) {
+
+      const dados =
+        usuarios[user];
+
+      setDadosUsuario({
+        usuario: user,
+        ...dados
+      });
+
+    } else {
+
+      alert(
+        "Usuário ou senha inválidos"
+      );
+
+    }
+
+  }
+
+  // ===== LOGOUT =====
+  function sair() {
+
+    setUsuario("");
+    setSenha("");
+    setDadosUsuario(null);
+
+  }
+
+  // ===== LOGIN =====
+  if (!dadosUsuario) {
+
+    return (
+
+      <main className={styles.body}>
+
+        <div className={styles.loginCard}>
+
+          <h1>
+            🥖 Padaria
+          </h1>
+
           <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+            Sistema interno
           </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+          <input
+            className={styles.input}
+            type="text"
+            placeholder="Usuário"
+            value={usuario}
+            onChange={(e) =>
+              setUsuario(
+                e.target.value
+              )
+            }
+          />
+
+          <input
+            className={styles.input}
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) =>
+              setSenha(
+                e.target.value
+              )
+            }
+          />
+
+          <button
+            className={styles.button}
+            onClick={entrar}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+            Entrar
+
+          </button>
+
         </div>
+
       </main>
-    </div>
+
+    );
+
+  }
+
+  // ===== HOME =====
+  return (
+
+    <main className={styles.body}>
+
+      {/* HEADER */}
+      <div className={styles.header}>
+
+        <div>
+
+          <h1>
+            👋 {dadosUsuario.nome}
+          </h1>
+
+          <p>
+            Função:
+            {" "}
+            {dadosUsuario.funcao}
+          </p>
+
+        </div>
+
+        <button
+          className={styles.sair}
+          onClick={sair}
+        >
+
+          Sair
+
+        </button>
+
+      </div>
+
+      {/* MENU */}
+      <div className={styles.grid}>
+
+        {/* ESCALA */}
+        <Link
+          href="/escala"
+          className={styles.card}
+        >
+
+          <h2>
+            📋 Escala
+          </h2>
+
+          <p>
+            Tarefas da equipe
+          </p>
+
+        </Link>
+
+        {/* ESTOQUE */}
+        <Link
+          href="/estoque"
+          className={styles.card}
+        >
+
+          <h2>
+            📦 Estoque
+          </h2>
+
+          <p>
+            Produtos da padaria
+          </p>
+
+        </Link>
+
+        {/* LIMPEZA */}
+        <Link
+          href="/limpeza"
+          className={styles.card}
+        >
+
+          <h2>
+            🧼 Limpeza
+          </h2>
+
+          <p>
+            Controle de limpeza
+          </p>
+
+        </Link>
+
+        {/* PRODUÇÃO */}
+        {
+          dadosUsuario.funcao !==
+          "atendente" && (
+
+            <Link
+              href="/producao"
+              className={styles.card}
+            >
+
+              <h2>
+                🥖 Produção
+              </h2>
+
+              <p>
+                Produção semanal
+              </p>
+
+            </Link>
+
+          )
+        }
+
+        {/* CAIXA */}
+        {
+          dadosUsuario.funcao !==
+          "padeiro" && (
+
+            <Link
+              href="/caixa"
+              className={styles.card}
+            >
+
+              <h2>
+                💰 Caixa
+              </h2>
+
+              <p>
+                Controle financeiro
+              </p>
+
+            </Link>
+
+          )
+        }
+
+        {/* PEDIDOS */}
+        <Link
+          href="/pedidos"
+          className={styles.card}
+        >
+
+          <h2>
+            📦 Pedidos
+          </h2>
+
+          <p>
+            Pedidos das filiais
+          </p>
+
+        </Link>
+
+        {/* ADMIN */}
+        {
+          dadosUsuario.funcao ===
+          "admin" && (
+
+            <Link
+              href="/admin"
+              className={styles.cardAdmin}
+            >
+
+              <h2>
+                👑 Admin
+              </h2>
+
+              <p>
+                Painel administrativo
+              </p>
+
+            </Link>
+
+          )
+        }
+
+      </div>
+
+    </main>
+
   );
 }

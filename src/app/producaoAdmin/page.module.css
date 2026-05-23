@@ -1,0 +1,94 @@
+.body {
+  background: #f3f5f7;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.header {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  color: white;
+  padding: 25px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.diaCard {
+  background: #fafafa;
+  border-radius: 16px;
+  padding: 15px;
+  margin-top: 15px;
+}
+
+.dia {
+  text-transform: capitalize;
+  color: #f57c00;
+}
+
+.diaCard ul {
+  padding-left: 20px;
+}
+
+.diaCard li {
+  margin-bottom: 8px;
+}
+
+.form {
+  margin-top: 20px;
+}
+
+.form input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.form button {
+  width: 100%;
+  padding: 12px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #43a047;
+  color: white;
+
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.lista {
+  margin-top: 25px;
+}
+
+.encomenda {
+  background: #f9f9f9;
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 15px;
+
+  border-left: 5px solid #ff9800;
+}
+
+@media (max-width: 700px) {
+
+  .body {
+    padding: 15px;
+  }
+
+}
