@@ -5,48 +5,167 @@ import styles from "./page.module.css";
 
 export default function Pedidos() {
 
-  // ===== PEDIDOS =====
-  const [pedidos, setPedidos] = useState([]);
+  // ===== STATES PEDIDOS =====
+  const [pedidos, setPedidos] =
+    useState([]);
 
-  // ===== FORM =====
-  const [padaria, setPadaria] = useState("Melvin");
-  const [produto, setProduto] = useState("");
-  const [quantidade, setQuantidade] = useState("");
-  const [observacao, setObservacao] = useState("");
+  // ===== FORM PEDIDO =====
+  const [filialPedido, setFilialPedido] =
+    useState("Melvin");
+
+  const [produtoPedido, setProdutoPedido] =
+    useState("");
+
+  const [quantidadePedido, setQuantidadePedido] =
+    useState("");
+
+  const [observacaoPedido, setObservacaoPedido] =
+    useState("");
+
+  // ===== FORM ENVIO =====
+  const [filialEnvio, setFilialEnvio] =
+    useState("Melvin");
+
+  const [tipo, setTipo] =
+    useState("Envio");
+
+  const [produtoEnvio, setProdutoEnvio] =
+    useState("");
+
+  const [quantidadeEnvio, setQuantidadeEnvio] =
+    useState("");
+
+  const [valor, setValor] =
+    useState("");
+
+  const [enviadoRecebido, setEnviadoRecebido] =
+    useState("");
+
+  const [observacaoEnvio, setObservacaoEnvio] =
+    useState("");
 
   // ===== ADICIONAR PEDIDO =====
   function adicionarPedido() {
 
-    if (!produto || !quantidade) {
-      alert("Preencha os campos!");
+    if (
+      !produtoPedido ||
+      !quantidadePedido
+    ) {
+
+      alert(
+        "Preencha os campos!"
+      );
+
       return;
+
     }
 
     const novoPedido = {
+
       id: Date.now(),
-      padaria,
-      produto,
-      quantidade,
-      observacao,
-      status: "Pendente"
+
+      categoria: "pedido",
+
+      filial: filialPedido,
+
+      produto: produtoPedido,
+
+      quantidade: quantidadePedido,
+
+      observacao: observacaoPedido,
+
+      status: "📦 Pendente"
+
     };
 
-    setPedidos([novoPedido, ...pedidos]);
+    setPedidos([
+      novoPedido,
+      ...pedidos
+    ]);
 
     // LIMPAR
-    setProduto("");
-    setQuantidade("");
-    setObservacao("");
+    setProdutoPedido("");
+    setQuantidadePedido("");
+    setObservacaoPedido("");
+
   }
 
-  // ===== CONTAGEM =====
-  const melvin = pedidos.filter(
-    (p) => p.padaria === "Melvin"
-  );
+  // ===== ADICIONAR ENVIO =====
+  function adicionarEnvio() {
 
-  const brigadeiro = pedidos.filter(
-    (p) => p.padaria === "Brigadeiro"
-  );
+    if (
+      !produtoEnvio ||
+      !quantidadeEnvio
+    ) {
+
+      alert(
+        "Preencha os campos!"
+      );
+
+      return;
+
+    }
+
+    const novoRegistro = {
+
+      id: Date.now(),
+
+      categoria: "envio",
+
+      filial: filialEnvio,
+
+      tipo,
+
+      produto: produtoEnvio,
+
+      quantidade: quantidadeEnvio,
+
+      valor,
+
+      enviadoPor,
+
+      recebidoPor,
+
+      observacao: observacaoEnvio,
+
+      data:
+        new Date()
+          .toLocaleDateString(),
+
+      status:
+        tipo === "Envio"
+          ? "🚚 Enviado"
+          : "✅ Recebido"
+
+    };
+
+    setPedidos([
+      novoRegistro,
+      ...pedidos
+    ]);
+
+    // LIMPAR
+    setProdutoEnvio("");
+    setQuantidadeEnvio("");
+    setValor("");
+    setEnviadoPor("");
+    setRecebidoPor("");
+    setObservacaoEnvio("");
+
+  }
+
+  // ===== FILTROS =====
+  const melvin =
+    pedidos.filter(
+      (p) =>
+        p.filial === "Melvin"
+    );
+
+  const brigadeiro =
+    pedidos.filter(
+      (p) =>
+        p.filial === "Brigadeiro"
+    );
 
   return (
 
@@ -55,24 +174,31 @@ export default function Pedidos() {
       {/* HEADER */}
       <div className={styles.header}>
 
-        <h1>📦 Pedidos das Filiais</h1>
+        <h1>
+          📦 Pedidos das Filiais
+        </h1>
 
         <p>
-          Solicitações enviadas para produção
+          Controle de pedidos,
+          envios e recebimentos
         </p>
 
       </div>
 
-      {/* FORMULÁRIO */}
+      {/* PEDIDOS */}
       <div className={styles.card}>
 
-        <h2>➕ Novo Pedido</h2>
+        <h2>
+          📋 Fazer Pedido
+        </h2>
 
-        {/* PADARIA */}
+        {/* FILIAL */}
         <select
-          value={padaria}
+          value={filialPedido}
           onChange={(e) =>
-            setPadaria(e.target.value)
+            setFilialPedido(
+              e.target.value
+            )
           }
           className={styles.input}
         >
@@ -92,9 +218,11 @@ export default function Pedidos() {
           className={styles.input}
           type="text"
           placeholder="Produto"
-          value={produto}
+          value={produtoPedido}
           onChange={(e) =>
-            setProduto(e.target.value)
+            setProdutoPedido(
+              e.target.value
+            )
           }
         />
 
@@ -103,9 +231,11 @@ export default function Pedidos() {
           className={styles.input}
           type="text"
           placeholder="Quantidade"
-          value={quantidade}
+          value={quantidadePedido}
           onChange={(e) =>
-            setQuantidade(e.target.value)
+            setQuantidadePedido(
+              e.target.value
+            )
           }
         />
 
@@ -113,9 +243,11 @@ export default function Pedidos() {
         <textarea
           className={styles.textarea}
           placeholder="Observação"
-          value={observacao}
+          value={observacaoPedido}
           onChange={(e) =>
-            setObservacao(e.target.value)
+            setObservacaoPedido(
+              e.target.value
+            )
           }
         />
 
@@ -123,7 +255,135 @@ export default function Pedidos() {
           className={styles.button}
           onClick={adicionarPedido}
         >
+
           Enviar Pedido
+
+        </button>
+
+      </div>
+
+      {/* ENVIO / RECEBIMENTO */}
+      <div className={styles.card}>
+
+        <h2>
+          🚚 Envio e Recebimento
+        </h2>
+
+        {/* FILIAL */}
+        <select
+          value={filialEnvio}
+          onChange={(e) =>
+            setFilialEnvio(
+              e.target.value
+            )
+          }
+          className={styles.input}
+        >
+
+          <option value="Melvin">
+            Melvin
+          </option>
+
+          <option value="Brigadeiro">
+            Brigadeiro
+          </option>
+
+        </select>
+
+        {/* TIPO */}
+        <select
+          value={tipo}
+          onChange={(e) =>
+            setTipo(
+              e.target.value
+            )
+          }
+          className={styles.input}
+        >
+
+          <option value="Envio">
+            🚚 Envio
+          </option>
+
+          <option value="Recebimento">
+            ✅ Recebimento
+          </option>
+
+        </select>
+
+        {/* PRODUTO */}
+        <input
+          className={styles.input}
+          type="text"
+          placeholder="Produto"
+          value={produtoEnvio}
+          onChange={(e) =>
+            setProdutoEnvio(
+              e.target.value
+            )
+          }
+        />
+
+        {/* QUANTIDADE */}
+        <input
+          className={styles.input}
+          type="text"
+          placeholder="Quantidade"
+          value={quantidadeEnvio}
+          onChange={(e) =>
+            setQuantidadeEnvio(
+              e.target.value
+            )
+          }
+        />
+
+        {/* VALOR */}
+        <input
+          className={styles.input}
+          type="text"
+          placeholder="Valor"
+          value={valor}
+          onChange={(e) =>
+            setValor(
+              e.target.value
+            )
+          }
+        />
+
+       
+
+        {/* RECEBIDO */}
+        <input
+          className={styles.input}
+          type="text"
+          placeholder="Quem recebeu/enviou"
+          value={enviadoRecebido}
+          onChange={(e) =>
+            setEnviadoRecebido(
+              e.target.value
+            )
+          }
+        />
+
+        {/* OBS */}
+        <textarea
+          className={styles.textarea}
+          placeholder="Observação"
+          value={observacaoEnvio}
+          onChange={(e) =>
+            setObservacaoEnvio(
+              e.target.value
+            )
+          }
+        />
+
+        <button
+          className={styles.button}
+          onClick={adicionarEnvio}
+        >
+
+          Salvar Registro
+
         </button>
 
       </div>
@@ -131,95 +391,283 @@ export default function Pedidos() {
       {/* MELVIN */}
       <div className={styles.card}>
 
-        <div className={styles.topoLista}>
+        <h2>
+          🏪 Melvin
+        </h2>
 
-          <h2>🏪 Melvin</h2>
-
-          <span>
-            {melvin.length} pedidos
-          </span>
-
-        </div>
-
-        {melvin.length === 0 && (
-          <p>Nenhum pedido.</p>
-        )}
-
-        {melvin.map((pedido) => (
-
-          <div
-            key={pedido.id}
-            className={styles.pedido}
-          >
-
-            <h3>{pedido.produto}</h3>
+        {
+          melvin.length === 0 && (
 
             <p>
-              <b>Quantidade:</b>{" "}
-              {pedido.quantidade}
+              Nenhum registro.
             </p>
 
-            <p>
-              <b>Obs:</b>{" "}
-              {pedido.observacao || "Nenhuma"}
-            </p>
+          )
+        }
 
-            <span className={styles.status}>
-              {pedido.status}
-            </span>
+        {
+          melvin.map((pedido) => (
 
-          </div>
+            <div
+              key={pedido.id}
+              className={styles.pedido}
+            >
 
-        ))}
+              <h3>
+                {pedido.produto}
+              </h3>
+
+              {
+                pedido.categoria ===
+                "pedido" ? (
+
+                  <>
+
+                    <p>
+                      <b>
+                        Quantidade:
+                      </b>
+                      {" "}
+                      {pedido.quantidade}
+                    </p>
+
+                    <p>
+                      <b>
+                        Obs:
+                      </b>
+                      {" "}
+                      {
+                        pedido.observacao ||
+                        "Nenhuma"
+                      }
+                    </p>
+
+                    <span className={styles.status}>
+                      {pedido.status}
+                    </span>
+
+                  </>
+
+                ) : (
+
+                  <>
+
+                    <p>
+                      <b>
+                        Tipo:
+                      </b>
+                      {" "}
+                      {pedido.tipo}
+                    </p>
+
+                    <p>
+                      <b>
+                        Quantidade:
+                      </b>
+                      {" "}
+                      {pedido.quantidade}
+                    </p>
+
+                    <p>
+                      <b>
+                        Valor:
+                      </b>
+                      {" "}
+                      R$ {pedido.valor}
+                    </p>
+
+                    <p>
+                      <b>
+                        Enviado:
+                      </b>
+                      {" "}
+                      {pedido.enviadoPor}
+                    </p>
+
+                    <p>
+                      <b>
+                        Recebido:
+                      </b>
+                      {" "}
+                      {pedido.recebidoPor}
+                    </p>
+
+                    <p>
+                      <b>
+                        Data:
+                      </b>
+                      {" "}
+                      {pedido.data}
+                    </p>
+
+                    <p>
+                      <b>
+                        Obs:
+                      </b>
+                      {" "}
+                      {
+                        pedido.observacao ||
+                        "Nenhuma"
+                      }
+                    </p>
+
+                    <span className={styles.status}>
+                      {pedido.status}
+                    </span>
+
+                  </>
+
+                )
+              }
+
+            </div>
+
+          ))
+        }
 
       </div>
 
       {/* BRIGADEIRO */}
       <div className={styles.card}>
 
-        <div className={styles.topoLista}>
+        <h2>
+          🏪 Brigadeiro
+        </h2>
 
-          <h2>🏪 Brigadeiro</h2>
-
-          <span>
-            {brigadeiro.length} pedidos
-          </span>
-
-        </div>
-
-        {brigadeiro.length === 0 && (
-          <p>Nenhum pedido.</p>
-        )}
-
-        {brigadeiro.map((pedido) => (
-
-          <div
-            key={pedido.id}
-            className={styles.pedido}
-          >
-
-            <h3>{pedido.produto}</h3>
+        {
+          brigadeiro.length === 0 && (
 
             <p>
-              <b>Quantidade:</b>{" "}
-              {pedido.quantidade}
+              Nenhum registro.
             </p>
 
-            <p>
-              <b>Obs:</b>{" "}
-              {pedido.observacao || "Nenhuma"}
-            </p>
+          )
+        }
 
-            <span className={styles.status}>
-              {pedido.status}
-            </span>
+        {
+          brigadeiro.map((pedido) => (
 
-          </div>
+            <div
+              key={pedido.id}
+              className={styles.pedido}
+            >
 
-        ))}
+              <h3>
+                {pedido.produto}
+              </h3>
+
+              {
+                pedido.categoria ===
+                "pedido" ? (
+
+                  <>
+
+                    <p>
+                      <b>
+                        Quantidade:
+                      </b>
+                      {" "}
+                      {pedido.quantidade}
+                    </p>
+
+                    <p>
+                      <b>
+                        Obs:
+                      </b>
+                      {" "}
+                      {
+                        pedido.observacao ||
+                        "Nenhuma"
+                      }
+                    </p>
+
+                    <span className={styles.status}>
+                      {pedido.status}
+                    </span>
+
+                  </>
+
+                ) : (
+
+                  <>
+
+                    <p>
+                      <b>
+                        Tipo:
+                      </b>
+                      {" "}
+                      {pedido.tipo}
+                    </p>
+
+                    <p>
+                      <b>
+                        Quantidade:
+                      </b>
+                      {" "}
+                      {pedido.quantidade}
+                    </p>
+
+                    <p>
+                      <b>
+                        Valor:
+                      </b>
+                      {" "}
+                      R$ {pedido.valor}
+                    </p>
+
+                    <p>
+                      <b>
+                        Enviado:
+                      </b>
+                      {" "}
+                      {pedido.enviadoPor}
+                    </p>
+
+                    <p>
+                      <b>
+                        Recebido:
+                      </b>
+                      {" "}
+                      {pedido.recebidoPor}
+                    </p>
+
+                    <p>
+                      <b>
+                        Data:
+                      </b>
+                      {" "}
+                      {pedido.data}
+                    </p>
+
+                    <p>
+                      <b>
+                        Obs:
+                      </b>
+                      {" "}
+                      {
+                        pedido.observacao ||
+                        "Nenhuma"
+                      }
+                    </p>
+
+                    <span className={styles.status}>
+                      {pedido.status}
+                    </span>
+
+                  </>
+
+                )
+              }
+
+            </div>
+
+          ))
+        }
 
       </div>
 
     </main>
+
   );
+
 }

@@ -35,7 +35,7 @@ export default function AdminLayout({
           </Link>
 
           <Link
-            href="/admin/producao"
+            href="/admin/producaoAdmin"
             className={styles.link}
           >
             🥖 Produção

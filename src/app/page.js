@@ -49,7 +49,7 @@ export default function Login() {
     useState("");
 
   const [dadosUsuario,
-  setDadosUsuario] =
+    setDadosUsuario] =
     useState(null);
 
   // ===== LOGIN =====
@@ -186,6 +186,21 @@ export default function Login() {
       {/* MENU */}
       <div className={styles.grid}>
 
+        <Link
+          href="/pedidosHome"
+          className={styles.card}
+        >
+
+          <h2>
+            📦 Fazer Pedido
+          </h2>
+
+          <p>
+            Pedidos para produção
+          </p>
+
+        </Link>
+
         {/* ESCALA */}
         <Link
           href="/escala"
@@ -282,16 +297,31 @@ export default function Login() {
 
         {/* PEDIDOS */}
         <Link
+          href="/encomenda"
+          className={styles.card}
+        >
+
+          <h2>
+            📦 Encomendas
+          </h2>
+
+          <p>
+            Encomendas clientes
+          </p>
+
+        </Link>
+
+        <Link
           href="/pedidos"
           className={styles.card}
         >
 
           <h2>
-            📦 Pedidos
+            📦 pedidos
           </h2>
 
           <p>
-            Pedidos das filiais
+            Pedidos filiais para Matriz
           </p>
 
         </Link>
