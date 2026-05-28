@@ -1,100 +1,135 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 
 export default function PedidosAdmin() {
 
-  // ===== PEDIDOS =====
-  const [pedidos, setPedidos] =
-    useState([
-
-      {
-        id: 1,
-        cliente: "Padaria Brigadeiro",
-        valor: 450,
-        dataPedido: "22/05/2026",
-        dataSaida: "23/05/2026",
-        responsavel: "Diandres",
-        status: "Pendente"
-      },
-
-      {
-        id: 2,
-        cliente: "Padaria Melvin",
-        valor: 820,
-        dataPedido: "22/05/2026",
-        dataSaida: "22/05/2026",
-        responsavel: "Leidi",
-        status: "Produção"
-      }
-
-    ]);
-
   // ===== STATES =====
-  const [cliente, setCliente] =
+  const [pedidos, setPedidos] =
+    useState([]);
+
+  const [filial, setFilial] =
+    useState("Melvin");
+
+  const [tipo, setTipo] =
+    useState("Envio");
+
+  const [produto, setProduto] =
+    useState("");
+
+  const [quantidade, setQuantidade] =
     useState("");
 
   const [valor, setValor] =
     useState("");
 
-  const [dataPedido, setDataPedido] =
+  const [enviadoPor, setEnviadoPor] =
     useState("");
 
-  const [dataSaida, setDataSaida] =
+  const [recebidoPor, setRecebidoPor] =
     useState("");
 
-  const [responsavel,
-  setResponsavel] =
+  const [observacao, setObservacao] =
     useState("");
 
   const [status, setStatus] =
-    useState("Pendente");
+    useState("🚚 Enviado");
 
   const [pesquisa, setPesquisa] =
     useState("");
 
-  // ===== ADD PEDIDO =====
+  // ===== CARREGAR =====
+  useEffect(() => {
+
+    const pedidosSalvos =
+      JSON.parse(
+        localStorage.getItem(
+          "pedidosFiliais"
+        )
+      ) || [];
+
+    setPedidos(pedidosSalvos);
+
+  }, []);
+
+  // ===== SALVAR =====
+  function salvarPedidos(lista) {
+
+    setPedidos(lista);
+
+    localStorage.setItem(
+      "pedidosFiliais",
+      JSON.stringify(lista)
+    );
+
+  }
+
+  // ===== ADICIONAR =====
   function adicionarPedido() {
 
     if (
-      !cliente ||
-      !valor ||
-      !dataPedido ||
-      !dataSaida ||
-      !responsavel
-    ) return;
+      !produto ||
+      !quantidade ||
+      !valor
+    ) {
 
-    const novo = {
+      alert(
+        "Preencha os campos!"
+      );
+
+      return;
+
+    }
+
+    const novoPedido = {
 
       id: Date.now(),
 
-      cliente,
+      filial,
 
-      valor:
-        Number(valor),
+      tipo,
 
-      dataPedido,
+      produto,
 
-      dataSaida,
+      quantidade,
 
-      responsavel,
+      valor,
 
-      status
+      enviadoPor,
+
+      recebidoPor,
+
+      observacao,
+
+      data:
+        new Date()
+          .toLocaleDateString(),
+
+      status:
+        tipo === "Envio"
+          ? "🚚 Enviado"
+          : "✅ Recebido"
 
     };
 
-    setPedidos([
-      novo,
+    const novaLista = [
+      novoPedido,
       ...pedidos
-    ]);
+    ];
 
-    setCliente("");
+    salvarPedidos(
+      novaLista
+    );
+
+    // ===== LIMPAR =====
+    setProduto("");
+    setQuantidade("");
     setValor("");
-    setDataPedido("");
-    setDataSaida("");
-    setResponsavel("");
-    setStatus("Pendente");
+    setEnviadoPor("");
+    setRecebidoPor("");
+    setObservacao("");
+
   }
 
   // ===== REMOVER =====
@@ -106,7 +141,9 @@ export default function PedidosAdmin() {
           pedido.id !== id
       );
 
-    setPedidos(novaLista);
+    salvarPedidos(
+      novaLista
+    );
 
   }
 
@@ -119,11 +156,17 @@ export default function PedidosAdmin() {
     const atualizados =
       pedidos.map((pedido) => {
 
-        if (pedido.id === id) {
+        if (
+          pedido.id === id
+        ) {
 
           return {
+
             ...pedido,
-            status: novoStatus
+
+            status:
+              novoStatus
+
           };
 
         }
@@ -132,20 +175,44 @@ export default function PedidosAdmin() {
 
       });
 
-    setPedidos(atualizados);
+    salvarPedidos(
+      atualizados
+    );
 
   }
 
   // ===== PESQUISA =====
   const pedidosFiltrados =
-    pedidos.filter((pedido) =>
+    pedidos.filter(
+      (pedido) =>
 
-      pedido.cliente
-        .toLowerCase()
-        .includes(
-          pesquisa.toLowerCase()
-        )
+        pedido.produto
+          .toLowerCase()
+          .includes(
+            pesquisa.toLowerCase()
+          ) ||
 
+        pedido.filial
+          .toLowerCase()
+          .includes(
+            pesquisa.toLowerCase()
+          )
+
+    );
+
+  // ===== FILIAIS =====
+  const melvin =
+    pedidosFiltrados.filter(
+      (pedido) =>
+        pedido.filial ===
+        "Melvin"
+    );
+
+  const brigadeiro =
+    pedidosFiltrados.filter(
+      (pedido) =>
+        pedido.filial ===
+        "Brigadeiro"
     );
 
   return (
@@ -156,11 +223,11 @@ export default function PedidosAdmin() {
       <div className={styles.header}>
 
         <h1>
-          📦 Pedidos
+          📦 Pedidos das Filiais
         </h1>
 
         <p>
-          Controle dos pedidos
+          Controle de envio e recebimento
         </p>
 
       </div>
@@ -169,24 +236,81 @@ export default function PedidosAdmin() {
       <div className={styles.card}>
 
         <h2>
-          ➕ Novo pedido
+          ➕ Novo Registro
         </h2>
 
+        {/* FILIAL */}
+        <select
+          className={styles.input}
+          value={filial}
+          onChange={(e) =>
+            setFilial(
+              e.target.value
+            )
+          }
+        >
+
+          <option value="Melvin">
+            Melvin
+          </option>
+
+          <option value="Brigadeiro">
+            Brigadeiro
+          </option>
+
+        </select>
+
+        {/* TIPO */}
+        <select
+          className={styles.input}
+          value={tipo}
+          onChange={(e) =>
+            setTipo(
+              e.target.value
+            )
+          }
+        >
+
+          <option value="Envio">
+            🚚 Envio
+          </option>
+
+          <option value="Recebimento">
+            ✅ Recebimento
+          </option>
+
+        </select>
+
+        {/* PRODUTO */}
         <input
           className={styles.input}
           type="text"
-          placeholder="Cliente / Filial"
-          value={cliente}
+          placeholder="Produto"
+          value={produto}
           onChange={(e) =>
-            setCliente(
+            setProduto(
               e.target.value
             )
           }
         />
 
+        {/* QUANTIDADE */}
         <input
           className={styles.input}
-          type="number"
+          type="text"
+          placeholder="Quantidade"
+          value={quantidade}
+          onChange={(e) =>
+            setQuantidade(
+              e.target.value
+            )
+          }
+        />
+
+        {/* VALOR */}
+        <input
+          className={styles.input}
+          type="text"
           placeholder="Valor"
           value={valor}
           onChange={(e) =>
@@ -196,81 +320,53 @@ export default function PedidosAdmin() {
           }
         />
 
-        <label className={styles.label}>
-          Data do pedido
-        </label>
-
-        <input
-          className={styles.input}
-          type="date"
-          value={dataPedido}
-          onChange={(e) =>
-            setDataPedido(
-              e.target.value
-            )
-          }
-        />
-
-        <label className={styles.label}>
-          Data de saída
-        </label>
-
-        <input
-          className={styles.input}
-          type="date"
-          value={dataSaida}
-          onChange={(e) =>
-            setDataSaida(
-              e.target.value
-            )
-          }
-        />
-
+        {/* ENVIADO */}
         <input
           className={styles.input}
           type="text"
-          placeholder="Quem fez"
-          value={responsavel}
+          placeholder="Quem enviou"
+          value={enviadoPor}
           onChange={(e) =>
-            setResponsavel(
+            setEnviadoPor(
               e.target.value
             )
           }
         />
 
-        <select
+        {/* RECEBIDO */}
+        <input
           className={styles.input}
-          value={status}
+          type="text"
+          placeholder="Quem recebeu"
+          value={recebidoPor}
           onChange={(e) =>
-            setStatus(
+            setRecebidoPor(
               e.target.value
             )
           }
-        >
+        />
 
-          <option>
-            Pendente
-          </option>
-
-          <option>
-            Produção
-          </option>
-
-          <option>
-            Finalizado
-          </option>
-
-          <option>
-            Entregue
-          </option>
-
-        </select>
+        {/* OBS */}
+        <textarea
+          className={styles.textarea}
+          placeholder="Observação"
+          value={observacao}
+          onChange={(e) =>
+            setObservacao(
+              e.target.value
+            )
+          }
+        />
 
         <button
           className={styles.button}
-          onClick={adicionarPedido}
+          onClick={
+            adicionarPedido
+          }
         >
-          Salvar pedido
+
+          Salvar Registro
+
         </button>
 
       </div>
@@ -281,7 +377,7 @@ export default function PedidosAdmin() {
         <input
           className={styles.input}
           type="text"
-          placeholder="🔍 Pesquisar pedido"
+          placeholder="🔍 Pesquisar"
           value={pesquisa}
           onChange={(e) =>
             setPesquisa(
@@ -292,53 +388,102 @@ export default function PedidosAdmin() {
 
       </div>
 
-      {/* LISTA */}
-      <div className={styles.lista}>
+      {/* MELVIN */}
+      <div className={styles.card}>
 
-        {pedidosFiltrados.map(
-          (pedido) => (
+        <div className={styles.topoLista}>
 
-            <div
-              key={pedido.id}
-              className={styles.item}
-            >
+          <h2>
+            🏪 Melvin
+          </h2>
 
-              <div className={styles.info}>
+          <span>
+            {melvin.length}
+            {" "}
+            registros
+          </span>
+
+        </div>
+
+        {
+          melvin.length === 0 && (
+
+            <p>
+              Nenhum registro.
+            </p>
+
+          )
+        }
+
+        {
+          melvin.map(
+            (pedido) => (
+
+              <div
+                key={pedido.id}
+                className={
+                  styles.pedido
+                }
+              >
 
                 <h3>
-                  {pedido.cliente}
+                  {pedido.produto}
                 </h3>
 
                 <p>
-                  💰 R$ {pedido.valor}
+                  <b>Tipo:</b>
+                  {" "}
+                  {pedido.tipo}
                 </p>
 
                 <p>
-                  📅 Pedido:
+                  <b>Quantidade:</b>
                   {" "}
-                  {pedido.dataPedido}
+                  {pedido.quantidade}
                 </p>
 
                 <p>
-                  🚚 Saída:
+                  <b>Valor:</b>
                   {" "}
-                  {pedido.dataSaida}
+                  R$
+                  {" "}
+                  {pedido.valor}
                 </p>
 
                 <p>
-                  👤
+                  <b>Enviado:</b>
                   {" "}
-                  {pedido.responsavel}
+                  {pedido.enviadoPor}
                 </p>
 
-              </div>
+                <p>
+                  <b>Recebido:</b>
+                  {" "}
+                  {pedido.recebidoPor}
+                </p>
 
-              {/* DIREITA */}
-              <div className={styles.direita}>
+                <p>
+                  <b>Data:</b>
+                  {" "}
+                  {pedido.data}
+                </p>
+
+                <p>
+                  <b>Obs:</b>
+                  {" "}
+                  {
+                    pedido.observacao ||
+                    "Nenhuma"
+                  }
+                </p>
 
                 <select
-                  className={styles.status}
-                  value={pedido.status}
+                  className={
+                    styles.status
+                  }
+                  value={
+                    pedido.status
+                  }
                   onChange={(e) =>
                     alterarStatus(
                       pedido.id,
@@ -348,19 +493,19 @@ export default function PedidosAdmin() {
                 >
 
                   <option>
-                    Pendente
+                    🚚 Enviado
                   </option>
 
                   <option>
-                    Produção
+                    ✅ Recebido
                   </option>
 
                   <option>
-                    Finalizado
+                    📦 Separando
                   </option>
 
                   <option>
-                    Entregue
+                    ✔️ Finalizado
                   </option>
 
                 </select>
@@ -375,18 +520,162 @@ export default function PedidosAdmin() {
                     )
                   }
                 >
-                  ❌
+                  ❌ Remover
                 </button>
 
               </div>
 
-            </div>
+            )
+          )
+        }
+
+      </div>
+
+      {/* BRIGADEIRO */}
+      <div className={styles.card}>
+
+        <div className={styles.topoLista}>
+
+          <h2>
+            🏪 Brigadeiro
+          </h2>
+
+          <span>
+            {brigadeiro.length}
+            {" "}
+            registros
+          </span>
+
+        </div>
+
+        {
+          brigadeiro.length === 0 && (
+
+            <p>
+              Nenhum registro.
+            </p>
 
           )
-        )}
+        }
+
+        {
+          brigadeiro.map(
+            (pedido) => (
+
+              <div
+                key={pedido.id}
+                className={
+                  styles.pedido
+                }
+              >
+
+                <h3>
+                  {pedido.produto}
+                </h3>
+
+                <p>
+                  <b>Tipo:</b>
+                  {" "}
+                  {pedido.tipo}
+                </p>
+
+                <p>
+                  <b>Quantidade:</b>
+                  {" "}
+                  {pedido.quantidade}
+                </p>
+
+                <p>
+                  <b>Valor:</b>
+                  {" "}
+                  R$
+                  {" "}
+                  {pedido.valor}
+                </p>
+
+                <p>
+                  <b>Enviado:</b>
+                  {" "}
+                  {pedido.enviadoPor}
+                </p>
+
+                <p>
+                  <b>Recebido:</b>
+                  {" "}
+                  {pedido.recebidoPor}
+                </p>
+
+                <p>
+                  <b>Data:</b>
+                  {" "}
+                  {pedido.data}
+                </p>
+
+                <p>
+                  <b>Obs:</b>
+                  {" "}
+                  {
+                    pedido.observacao ||
+                    "Nenhuma"
+                  }
+                </p>
+
+                <select
+                  className={
+                    styles.status
+                  }
+                  value={
+                    pedido.status
+                  }
+                  onChange={(e) =>
+                    alterarStatus(
+                      pedido.id,
+                      e.target.value
+                    )
+                  }
+                >
+
+                  <option>
+                    🚚 Enviado
+                  </option>
+
+                  <option>
+                    ✅ Recebido
+                  </option>
+
+                  <option>
+                    📦 Separando
+                  </option>
+
+                  <option>
+                    ✔️ Finalizado
+                  </option>
+
+                </select>
+
+                <button
+                  className={
+                    styles.remover
+                  }
+                  onClick={() =>
+                    removerPedido(
+                      pedido.id
+                    )
+                  }
+                >
+                  ❌ Remover
+                </button>
+
+              </div>
+
+            )
+          )
+        }
 
       </div>
 
     </main>
+
   );
+
 }

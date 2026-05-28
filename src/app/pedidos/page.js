@@ -38,7 +38,10 @@ export default function Pedidos() {
   const [valor, setValor] =
     useState("");
 
-  const [enviadoRecebido, setEnviadoRecebido] =
+  const [enviadoPor, setEnviadoPor] =
+    useState("");
+
+  const [recebidoPor, setRecebidoPor] =
     useState("");
 
   const [observacaoEnvio, setObservacaoEnvio] =
@@ -352,14 +355,27 @@ export default function Pedidos() {
 
        
 
+        {/* ENVIADO */}
+        <input
+          className={styles.input}
+          type="text"
+          placeholder="Quem enviou"
+          value={enviadoPor}
+          onChange={(e) =>
+            setEnviadoPor(
+              e.target.value
+            )
+          }
+        />
+
         {/* RECEBIDO */}
         <input
           className={styles.input}
           type="text"
-          placeholder="Quem recebeu/enviou"
-          value={enviadoRecebido}
+          placeholder="Quem recebeu"
+          value={recebidoPor}
           onChange={(e) =>
-            setEnviadoRecebido(
+            setRecebidoPor(
               e.target.value
             )
           }
