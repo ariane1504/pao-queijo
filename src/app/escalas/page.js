@@ -1,192 +1,134 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 
-export default function Home() {
+// ===== TAREFAS (fora do componente) =====
+const TAREFAS = {
+  diandres: [
+    "Limpeza da bancada",
+    "Limpeza do chão",
+    "Limpeza do balcão",
+    "Organizar e repor a mercearia",
+    "Limpeza da máquina de café",
+  ],
+  leidi: [
+    "Reposição dos frios",
+    "Limpeza do chão",
+    "Limpeza da chapa",
+    "Produtos",
+  ],
+  lenir: [
+    "Reposição e corte dos frios",
+    "Limpeza do chão",
+    "Reposição dos pães",
+    "Anotar sobras",
+  ],
+  andreina: [
+    "Limpeza da bancada",
+    "Limpeza do chão",
+    "Limpeza do balcão",
+    "Mesa dos pães",
+    "Verificar validade",
+  ],
+  karla: [
+    "Reposição dos pães",
+    "Organização dos cestinhos",
+    "Verificar validade",
+    "Mesa dos pães",
+  ],
+};
 
-  // ===== USUÁRIOS =====
-  const usuarios = {
-    admin: { senha: "admin123", tipo: "admin" },
-    diandres: { senha: "123", tipo: "user" },
-    leidi: { senha: "123", tipo: "user" },
-    lenir: { senha: "123", tipo: "user" },
-    andreina: { senha: "123", tipo: "user" },
-    karla: { senha: "123", tipo: "user" }
-  };
-
-  // ===== TAREFAS =====
-  const tarefas = {
-    diandres: [
-      "Limpeza da bancada",
-      "Limpeza do chão",
-      "Limpeza do balcão",
-      "Organizar e repor a mercearia",
-      "Limpeza da máquina de café"
-    ],
-
-    leidi: [
-      "Reposição dos frios",
-      "Limpeza do chão",
-      "Limpeza da chapa",
-      "Produtos"
-    ],
-
-    lenir: [
-      "Reposição e corte dos frios",
-      "Limpeza do chão",
-      "Reposição dos pães",
-      "Anotar sobras"
-    ],
-
-    andreina: [
-      "Limpeza da bancada",
-      "Limpeza do chão",
-      "Limpeza do balcão",
-      "Mesa dos pães",
-      "Verificar validade"
-    ],
-
-    karla: [
-      "Reposição dos pães",
-      "Organização dos cestinhos",
-      "Verificar validade",
-      "Mesa dos pães"
-    ]
-  };
+export default function Escalas() {
 
   // ===== STATES =====
-  const [usuario, setUsuario] = useState("");
-  const [senha, setSenha] = useState("");
-  const [usuarioLogado, setUsuarioLogado] = useState(null);
-  const [progresso, setProgresso] = useState({});
-  const [anotacao, setAnotacao] = useState("");
+  const [usuarioLogado, setUsuarioLogado] = useState(null); // null = carregando
+  const [tipoUsuario, setTipoUsuario]     = useState("");
+  const [progresso, setProgresso]         = useState({});
+  const [anotacao, setAnotacao]           = useState("");
 
-  // ===== LOGIN =====
-  function entrar() {
+  // ===== CARREGAR SESSÃO =====
+  useEffect(() => {
+    const salvo = localStorage.getItem("usuarioLogado");
 
-    const user = usuario.toLowerCase();
-
-    if (
-      usuarios[user] &&
-      usuarios[user].senha === senha
-    ) {
+    if (salvo) {
+      const dados = JSON.parse(salvo);
+      const user  = dados.usuario;
 
       setUsuarioLogado(user);
+      setTipoUsuario(dados.funcao || dados.tipo || "");
 
-      const dados =
-        JSON.parse(localStorage.getItem(user)) || {};
+      // Carregar progresso salvo
+      const progressoSalvo = localStorage.getItem("progresso_" + user);
+      if (progressoSalvo) setProgresso(JSON.parse(progressoSalvo));
 
-      setProgresso(dados);
-
-      const anot =
-        localStorage.getItem("anotacao_" + user) || "";
-
-      setAnotacao(anot);
+      // Carregar anotação salva
+      const anotacaoSalva = localStorage.getItem("anotacao_" + user);
+      if (anotacaoSalva) setAnotacao(anotacaoSalva);
 
     } else {
-      alert("Usuário ou senha inválidos!");
+      setUsuarioLogado(false); // não logado
     }
-  }
+  }, []);
 
   // ===== SAIR =====
   function sair() {
-
-    setUsuario("");
-    setSenha("");
-    setUsuarioLogado(null);
+    localStorage.removeItem("usuarioLogado");
+    setUsuarioLogado(false);
     setProgresso({});
     setAnotacao("");
   }
 
   // ===== SALVAR CHECK =====
   function salvar(index, status) {
-
-    const novo = {
-      ...progresso,
-      [index]: status
-    };
-
+    const novo = { ...progresso, [index]: status };
     setProgresso(novo);
-
-    localStorage.setItem(
-      usuarioLogado,
-      JSON.stringify(novo)
-    );
+    localStorage.setItem("progresso_" + usuarioLogado, JSON.stringify(novo));
   }
 
   // ===== SALVAR ANOTAÇÃO =====
   function salvarAnotacao() {
-
-    localStorage.setItem(
-      "anotacao_" + usuarioLogado,
-      anotacao
-    );
-
+    localStorage.setItem("anotacao_" + usuarioLogado, anotacao);
     alert("Anotação salva!");
   }
 
   // ===== CALCULAR PROGRESSO =====
   function calcularPorcentagem(user) {
-
     const dados =
       user === usuarioLogado
         ? progresso
-        : JSON.parse(localStorage.getItem(user)) || {};
+        : JSON.parse(localStorage.getItem("progresso_" + user)) || {};
 
-    const total = tarefas[user].length;
+    const total  = TAREFAS[user]?.length || 0;
+    if (total === 0) return 0;
 
-    const feitas =
-      Object.values(dados).filter((v) => v).length;
-
+    const feitas = Object.values(dados).filter((v) => v).length;
     return Math.round((feitas / total) * 100);
   }
 
-  // ===== ADMIN =====
+  // ===== PAINEL ADMIN =====
   function renderAdmin() {
-
     return (
-
       <div className={styles.card}>
-
         <h3>📊 Painel Geral</h3>
 
-        {Object.keys(tarefas).map((user) => {
-
-          const porcentagem =
-            calcularPorcentagem(user);
-
-          const anot =
-            localStorage.getItem(
-              "anotacao_" + user
-            ) || "Sem anotação";
+        {Object.keys(TAREFAS).map((user) => {
+          const porcentagem = calcularPorcentagem(user);
+          const anot = localStorage.getItem("anotacao_" + user) || "Sem anotação";
 
           return (
-
-            <div
-              key={user}
-              className={styles.adminCard}
-            >
-
+            <div key={user} className={styles.adminCard}>
               <strong>{user}</strong>
-
-              <p>
-                {porcentagem}% concluído
-              </p>
+              <p>{porcentagem}% concluído</p>
 
               <div className={styles.progresso}>
                 <div
                   className={styles.barra}
-                  style={{
-                    width: `${porcentagem}%`
-                  }}
+                  style={{ width: `${porcentagem}%` }}
                 />
               </div>
 
-              <p>
-                <b>Anotação:</b> {anot}
-              </p>
-
+              <p><b>Anotação:</b> {anot}</p>
             </div>
           );
         })}
@@ -194,171 +136,78 @@ export default function Home() {
     );
   }
 
-  // ===== LOGIN =====
-  if (!usuarioLogado) {
+  // ===== GUARDS =====
+  if (usuarioLogado === null) {
+    return <p>Carregando...</p>;
+  }
 
+  if (usuarioLogado === false) {
     return (
-
       <main className={styles.body}>
-
-        <div className={styles.container}>
-
-          <div className={styles.card}>
-
-            <h1 className={styles.titulo}>
-              🔐 Login
-            </h1>
-
-            <input
-              className={styles.input}
-              type="text"
-              placeholder="Usuário"
-              value={usuario}
-              onChange={(e) =>
-                setUsuario(e.target.value)
-              }
-            />
-
-            <input
-              className={styles.input}
-              type="password"
-              placeholder="Senha"
-              value={senha}
-              onChange={(e) =>
-                setSenha(e.target.value)
-              }
-            />
-
-            <button
-              className={styles.button}
-              onClick={entrar}
-            >
-              Entrar
-            </button>
-
-          </div>
-
-        </div>
-
+        <h2>Faça login primeiro.</h2>
       </main>
     );
   }
 
-  // ===== PROGRESSO =====
-  const porcentagem =
-    usuarioLogado !== "admin"
-      ? calcularPorcentagem(usuarioLogado)
-      : 0;
+  const isAdmin     = tipoUsuario === "admin" || usuarioLogado === "admin";
+  const porcentagem = !isAdmin ? calcularPorcentagem(usuarioLogado) : 0;
 
   // ===== TELA PRINCIPAL =====
   return (
-
     <main className={styles.body}>
-
       <div className={styles.container}>
 
+        {/* HEADER */}
         <div className={`${styles.card} ${styles.topo}`}>
-
-          <h2>
-            👋 {usuarioLogado}
-          </h2>
-
-          <button
-            className={styles.buttonSair}
-            onClick={sair}
-          >
-            Sair
-          </button>
-
+          <h2>👋 {usuarioLogado}</h2>
+          <button className={styles.buttonSair} onClick={sair}>Sair</button>
         </div>
 
-        {/* ADMIN */}
-        {usuarioLogado === "admin" ? (
-
-          renderAdmin()
-
-        ) : (
-
+        {isAdmin ? renderAdmin() : (
           <>
             {/* TAREFAS */}
             <div className={styles.card}>
-
               <h3>📋 Suas tarefas</h3>
 
-              {tarefas[usuarioLogado].map(
-                (tarefa, index) => (
+              {(TAREFAS[usuarioLogado] || []).map((tarefa, index) => (
+                <div key={index} className={styles.item}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={progresso[index] || false}
+                      onChange={(e) => salvar(index, e.target.checked)}
+                    />
+                    {" "}{tarefa}
+                  </label>
+                </div>
+              ))}
 
-                  <div
-                    key={index}
-                    className={styles.item}
-                  >
-
-                    <label>
-
-                      <input
-                        type="checkbox"
-                        checked={
-                          progresso[index] || false
-                        }
-                        onChange={(e) =>
-                          salvar(
-                            index,
-                            e.target.checked
-                          )
-                        }
-                      />
-
-                      {" "}
-                      {tarefa}
-
-                    </label>
-
-                  </div>
-                )
-              )}
-
-              <p className={styles.textoProgresso}>
-                {porcentagem}% concluído
-              </p>
-
+              <p className={styles.textoProgresso}>{porcentagem}% concluído</p>
               <div className={styles.progresso}>
-                <div
-                  className={styles.barra}
-                  style={{
-                    width: `${porcentagem}%`
-                  }}
-                />
+                <div className={styles.barra} style={{ width: `${porcentagem}%` }} />
               </div>
-
             </div>
 
             {/* ANOTAÇÕES */}
             <div className={styles.card}>
-
               <h3>📝 Anotações</h3>
 
               <textarea
                 className={styles.textarea}
                 rows="5"
                 value={anotacao}
-                onChange={(e) =>
-                  setAnotacao(e.target.value)
-                }
+                onChange={(e) => setAnotacao(e.target.value)}
               />
 
-              <button
-                className={styles.button}
-                onClick={salvarAnotacao}
-              >
+              <button className={styles.button} onClick={salvarAnotacao}>
                 Salvar anotação
               </button>
-
+              
             </div>
           </>
         )}
 
       </div>
-
     </main>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function Limpeza() {
@@ -94,6 +95,9 @@ export default function Limpeza() {
           <span>
             {porcentagem}%
           </span>
+          <Link href="/" className={styles["btnvoltar"]}>
+            Voltar para Home
+          </Link>
 
         </div>
 

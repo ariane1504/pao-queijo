@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -52,6 +52,17 @@ export default function Login() {
     setDadosUsuario] =
     useState(null);
 
+  useEffect(() => {
+  const usuarioSalvo =
+    localStorage.getItem("usuarioLogado");
+
+  if (usuarioSalvo) {
+    setDadosUsuario(
+      JSON.parse(usuarioSalvo)
+    );
+  }
+}, []);
+
   // ===== LOGIN =====
   function entrar() {
 
@@ -68,10 +79,17 @@ export default function Login() {
       const dados =
         usuarios[user];
 
-      setDadosUsuario({
-        usuario: user,
-        ...dados
-      });
+      const usuarioLogado = {
+  usuario: user,
+  ...dados
+};
+
+localStorage.setItem(
+  "usuarioLogado",
+  JSON.stringify(usuarioLogado)
+);
+
+setDadosUsuario(usuarioLogado);;
 
     } else {
 
@@ -86,11 +104,15 @@ export default function Login() {
   // ===== LOGOUT =====
   function sair() {
 
-    setUsuario("");
-    setSenha("");
-    setDadosUsuario(null);
+  localStorage.removeItem(
+    "usuarioLogado"
+  );
 
-  }
+  setUsuario("");
+  setSenha("");
+  setDadosUsuario(null);
+
+}
 
   // ===== LOGIN =====
   if (!dadosUsuario) {
@@ -187,7 +209,7 @@ export default function Login() {
       <div className={styles.grid}>
 
         <Link
-          href="/pedidosHome"
+          href="/pedidos"
           className={styles.card}
         >
 
@@ -203,7 +225,7 @@ export default function Login() {
 
         {/* ESCALA */}
         <Link
-          href="/escala"
+          href="/escalas"
           className={styles.card}
         >
 
