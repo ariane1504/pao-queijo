@@ -1,174 +1,199 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/app/lib/supabase";
 import styles from "./page.module.css";
 
 export default function EstoqueAdmin() {
 
   // ===== PRODUTOS =====
-  const [produtos, setProdutos] =
-    useState([
+  const [produtos, setProdutos] = useState([]);
+  const [estoque, setEstoque] = useState([]);
 
-      {
-        id: 1,
-        nome: "Farinha",
-        categoria: "Matéria-prima",
-        quantidade: 15,
-        unidade: "sacos"
-      },
+  // ===== STATES CADASTRO PRODUTO =====
+  const [nome, setNome] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [unidade, setUnidade] = useState("");
 
-      {
-        id: 2,
-        nome: "Margarina",
-        categoria: "Matéria-prima",
-        quantidade: 4,
-        unidade: "baldes"
-      },
+  // ===== STATES ESTOQUE =====
+  const [produtoSelecionado, setProdutoSelecionado] = useState("");
+  const [quantidade, setQuantidade] = useState("");
+  const [estoqueMinimo, setEstoqueMinimo] = useState("");
 
-      {
-        id: 3,
-        nome: "Presunto",
-        categoria: "Frios",
-        quantidade: 12,
-        unidade: "kg"
-      }
+  // ===== PESQUISA =====
+  const [pesquisa, setPesquisa] = useState("");
 
-    ]);
+  // ===== LOADING =====
+  const [loading, setLoading] = useState(false);
 
-  // ===== STATES =====
-  const [nome, setNome] =
-    useState("");
+  // ===== CARREGAR =====
+  useEffect(() => {
+    carregarDados();
+  }, []);
 
-  const [categoria, setCategoria] =
-    useState("");
+  async function carregarDados() {
+    setLoading(true);
 
-  const [quantidade, setQuantidade] =
-    useState("");
+    const { data: dataProdutos, error: errProdutos } = await supabase
+      .from("produto")
+      .select("*")
+      .order("nome");
 
-  const [unidade, setUnidade] =
-    useState("");
+    const { data: dataEstoque, error: errEstoque } = await supabase
+      .from("estoque")
+      .select("*, produto:produto_id(id, nome, categoria, unidade)")
+      .order("id");
 
-  const [pesquisa, setPesquisa] =
-    useState("");
+    if (errProdutos) console.error("Erro produtos:", errProdutos);
+    if (errEstoque) console.error("Erro estoque:", errEstoque);
 
-  // ===== ADICIONAR =====
-  function adicionarProduto() {
+    setProdutos(dataProdutos || []);
+    setEstoque(dataEstoque || []);
+    setLoading(false);
+  }
 
-    if (
-      !nome ||
-      !categoria ||
-      !quantidade ||
-      !unidade
-    ) return;
+  // ===== ADICIONAR PRODUTO =====
+  async function adicionarProduto() {
+    if (!nome || !categoria || !unidade) {
+      alert("Preencha todos os campos do produto.");
+      return;
+    }
 
-    const novo = {
+    const { error } = await supabase
+      .from("produto")
+      .insert([{ nome, categoria, unidade }]);
 
-      id: Date.now(),
+    if (error) {
+      alert("Erro ao cadastrar produto: " + error.message);
+      return;
+    }
 
-      nome,
-      categoria,
-
-      quantidade,
-      unidade
-
-    };
-
-    setProdutos([
-      ...produtos,
-      novo
-    ]);
-
+    carregarDados();
     setNome("");
     setCategoria("");
-    setQuantidade("");
     setUnidade("");
   }
 
-  // ===== REMOVER =====
-  function removerProduto(id) {
+  // ===== REMOVER PRODUTO =====
+  async function removerProduto(id) {
+    if (!confirm("Remover este produto? Isso também remove o estoque vinculado.")) return;
 
-    const novaLista =
-      produtos.filter(
-        (produto) =>
-          produto.id !== id
-      );
+    // Remove estoque vinculado primeiro
+    await supabase.from("estoque").delete().eq("produto_id", id);
 
-    setProdutos(novaLista);
+    const { error } = await supabase
+      .from("produto")
+      .delete()
+      .eq("id", id);
 
+    if (error) {
+      alert("Erro ao remover: " + error.message);
+      return;
+    }
+
+    carregarDados();
   }
 
-  // ===== ALTERAR QTD =====
-  function alterarQuantidade(
-    id,
-    valor
-  ) {
+  // ===== SALVAR ESTOQUE =====
+  async function salvarEstoque() {
+    if (!produtoSelecionado || !quantidade) {
+      alert("Selecione um produto e informe a quantidade.");
+      return;
+    }
 
-    const atualizados =
-      produtos.map((produto) => {
+    const produtoId = Number(produtoSelecionado);
 
-        if (produto.id === id) {
+    // Verifica se já existe entrada de estoque para este produto
+    const existente = estoque.find((e) => e.produto_id === produtoId);
 
-          return {
-            ...produto,
-            quantidade: valor
-          };
+    if (existente) {
+      // Atualiza
+      const { error } = await supabase
+        .from("estoque")
+        .update({
+          quantidade: Number(quantidade),
+          estoque_minimo: estoqueMinimo ? Number(estoqueMinimo) : existente.estoque_minimo,
+        })
+        .eq("id", existente.id);
 
-        }
+      if (error) {
+        alert("Erro ao atualizar estoque: " + error.message);
+        return;
+      }
+    } else {
+      // Insere
+      const { error } = await supabase
+        .from("estoque")
+        .insert([{
+          produto_id: produtoId,
+          quantidade: Number(quantidade),
+          estoque_minimo: estoqueMinimo ? Number(estoqueMinimo) : 0,
+        }]);
 
-        return produto;
+      if (error) {
+        alert("Erro ao inserir estoque: " + error.message);
+        return;
+      }
+    }
 
-      });
+    carregarDados();
+    setProdutoSelecionado("");
+    setQuantidade("");
+    setEstoqueMinimo("");
+  }
 
-    setProdutos(atualizados);
+  // ===== ATUALIZAR ESTOQUE MINIMO INLINE =====
+  async function atualizarMinimo(estoqueId, novoMinimo) {
+    const { error } = await supabase
+      .from("estoque")
+      .update({ estoque_minimo: Number(novoMinimo) })
+      .eq("id", estoqueId);
 
+    if (error) console.error("Erro ao atualizar mínimo:", error);
+    carregarDados();
   }
 
   // ===== PESQUISA =====
-  const produtosFiltrados =
-    produtos.filter((produto) =>
+  const estoqueFiltrado = estoque.filter((item) =>
+    item.produto?.nome?.toLowerCase().includes(pesquisa.toLowerCase())
+  );
 
-      produto.nome
-        .toLowerCase()
-        .includes(
-          pesquisa.toLowerCase()
-        )
-
-    );
+  // ===== ALERTAS =====
+  const alertas = estoque.filter(
+    (item) => item.estoque_minimo && item.quantidade <= item.estoque_minimo
+  );
 
   return (
-
     <main className={styles.body}>
 
       {/* HEADER */}
       <div className={styles.header}>
-
-        <h1>
-          📦 Controle de Estoque
-        </h1>
-
-        <p>
-          Gerenciamento dos produtos
-        </p>
-
+        <h1>📦 Estoque — Admin</h1>
+        <p>Cadastro de produtos e controle de estoque mínimo</p>
       </div>
 
-      {/* CADASTRO */}
-      <div className={styles.card}>
+      {/* ALERTAS */}
+      {alertas.length > 0 && (
+        <div className={styles.card} style={{ borderLeft: "6px solid #ef5350" }}>
+          <h2>⚠️ Estoque baixo</h2>
+          {alertas.map((item) => (
+            <p key={item.id} style={{ color: "#c62828", margin: "4px 0" }}>
+              ❗ <strong>{item.produto?.nome}</strong> — {item.quantidade} {item.produto?.unidade} (mínimo: {item.estoque_minimo})
+            </p>
+          ))}
+        </div>
+      )}
 
-        <h2>
-          ➕ Adicionar Produto
-        </h2>
+      {/* CADASTRO DE PRODUTO */}
+      <div className={styles.card}>
+        <h2>➕ Cadastrar Produto</h2>
 
         <input
           className={styles.input}
           type="text"
           placeholder="Nome"
           value={nome}
-          onChange={(e) =>
-            setNome(
-              e.target.value
-            )
-          }
+          onChange={(e) => setNome(e.target.value)}
         />
 
         <input
@@ -176,138 +201,150 @@ export default function EstoqueAdmin() {
           type="text"
           placeholder="Categoria"
           value={categoria}
-          onChange={(e) =>
-            setCategoria(
-              e.target.value
-            )
-          }
+          onChange={(e) => setCategoria(e.target.value)}
         />
+
+        <input
+          className={styles.input}
+          type="text"
+          placeholder="Unidade (kg, un, sacos...)"
+          value={unidade}
+          onChange={(e) => setUnidade(e.target.value)}
+        />
+
+        <button className={styles.button} onClick={adicionarProduto}>
+          Cadastrar produto
+        </button>
+      </div>
+
+      {/* LANÇAR ESTOQUE */}
+      <div className={styles.card}>
+        <h2>📊 Lançar / Atualizar Estoque</h2>
+
+        <select
+          className={styles.input}
+          value={produtoSelecionado}
+          onChange={(e) => setProdutoSelecionado(e.target.value)}
+        >
+          <option value="">Selecione o produto</option>
+          {produtos.map((p) => (
+            <option key={p.id} value={p.id}>{p.nome} ({p.unidade})</option>
+          ))}
+        </select>
 
         <input
           className={styles.input}
           type="number"
           placeholder="Quantidade"
           value={quantidade}
-          onChange={(e) =>
-            setQuantidade(
-              e.target.value
-            )
-          }
+          onChange={(e) => setQuantidade(e.target.value)}
         />
 
         <input
           className={styles.input}
-          type="text"
-          placeholder="Unidade"
-          value={unidade}
-          onChange={(e) =>
-            setUnidade(
-              e.target.value
-            )
-          }
+          type="number"
+          placeholder="Estoque mínimo (opcional)"
+          value={estoqueMinimo}
+          onChange={(e) => setEstoqueMinimo(e.target.value)}
         />
 
-        <button
-          className={styles.button}
-          onClick={adicionarProduto}
-        >
-          Adicionar produto
+        <button className={styles.button} onClick={salvarEstoque}>
+          Salvar estoque
         </button>
-
       </div>
 
       {/* PESQUISA */}
       <div className={styles.card}>
-
         <input
           className={styles.input}
           type="text"
           placeholder="🔍 Pesquisar produto"
           value={pesquisa}
-          onChange={(e) =>
-            setPesquisa(
-              e.target.value
-            )
-          }
+          onChange={(e) => setPesquisa(e.target.value)}
         />
-
       </div>
 
-      {/* LISTA */}
-      <div className={styles.grid}>
-
-        {produtosFiltrados.map(
-          (produto) => (
-
-            <div
-              key={produto.id}
-              className={styles.produto}
-            >
-
-              <div className={styles.topo}>
-
-                <div>
-
-                  <h3>
-                    {produto.nome}
-                  </h3>
-
-                  <p>
-                    {produto.categoria}
-                  </p>
-
+      {/* LISTA DE ESTOQUE */}
+      {loading ? (
+        <div className={styles.card}><p>Carregando...</p></div>
+      ) : (
+        <div className={styles.grid}>
+          {estoqueFiltrado.map((item) => {
+            const baixo = item.estoque_minimo && item.quantidade <= item.estoque_minimo;
+            return (
+              <div
+                key={item.id}
+                className={styles.produto}
+                style={baixo ? { borderLeft: "5px solid #ef5350" } : { borderLeft: "5px solid #43a047" }}
+              >
+                <div className={styles.topo}>
+                  <div>
+                    <h3>{item.produto?.nome}</h3>
+                    <p>{item.produto?.categoria}</p>
+                    <p><strong>Quantidade:</strong> {item.quantidade} {item.produto?.unidade}</p>
+                    <p><strong>Unidade:</strong> {item.produto?.unidade}</p>
+                    {baixo && (
+                      <span style={{
+                        background: "#ef5350", color: "white",
+                        padding: "4px 10px", borderRadius: "8px",
+                        fontSize: "13px", fontWeight: "bold"
+                      }}>
+                        ⚠️ Estoque baixo
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    className={styles.remover}
+                    onClick={() => removerProduto(item.produto?.id)}
+                  >
+                    ❌
+                  </button>
                 </div>
 
-                <button
-                  className={
-                    styles.remover
-                  }
-                  onClick={() =>
-                    removerProduto(
-                      produto.id
-                    )
-                  }
-                >
-                  ❌
-                </button>
-
+                {/* EDITAR MÍNIMO INLINE */}
+                <div className={styles.info}>
+                  <label style={{ fontSize: "13px", color: "#555" }}>Mínimo:</label>
+                  <input
+                    className={styles.quantidade}
+                    type="number"
+                    defaultValue={item.estoque_minimo || 0}
+                    onBlur={(e) => atualizarMinimo(item.id, e.target.value)}
+                  />
+                </div>
               </div>
+            );
+          })}
 
-              <div
-                className={styles.info}
-              >
-
-                <span>
-                  Quantidade:
-                </span>
-
-                <input
-                  className={
-                    styles.quantidade
-                  }
-                  type="number"
-                  value={
-                    produto.quantidade
-                  }
-                  onChange={(e) =>
-                    alterarQuantidade(
-                      produto.id,
-                      e.target.value
-                    )
-                  }
-                />
-
-                <span>
-                  {produto.unidade}
-                </span>
-
-              </div>
-
+          {estoqueFiltrado.length === 0 && (
+            <div className={styles.card}>
+              <p>Nenhum produto no estoque ainda.</p>
             </div>
+          )}
+        </div>
+      )}
 
-          )
-        )}
-
+      {/* TODOS OS PRODUTOS CADASTRADOS (sem estoque) */}
+      <div className={styles.card}>
+        <h2>📋 Todos os produtos cadastrados</h2>
+        <p style={{ color: "#777", marginBottom: "10px" }}>
+          {produtos.length} produtos — {estoque.length} com estoque lançado
+        </p>
+        <div className={styles.grid}>
+          {produtos
+            .filter((p) => !estoque.find((e) => e.produto_id === p.id))
+            .map((p) => (
+              <div key={p.id} className={styles.produto} style={{ borderLeft: "5px solid #bbb" }}>
+                <div className={styles.topo}>
+                  <div>
+                    <h3>{p.nome}</h3>
+                    <p>{p.categoria} — {p.unidade}</p>
+                    <p style={{ color: "#aaa", fontSize: "13px" }}>Sem estoque lançado</p>
+                  </div>
+                  <button className={styles.remover} onClick={() => removerProduto(p.id)}>❌</button>
+                </div>
+              </div>
+            ))}
+        </div>
       </div>
 
     </main>

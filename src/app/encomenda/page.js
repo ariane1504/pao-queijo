@@ -1,582 +1,183 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { supabase } from "@/app/lib/supabase";
 import styles from "./page.module.css";
 
 export default function Encomendas() {
 
-  // ===== STATES =====
-  const [produto, setProduto] =
-    useState("");
+  const [encomendas, setEncomendas] = useState([]);
+  const [produtos, setProdutos] = useState([]);
+  const [funcionarios, setFuncionarios] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [quantidade, setQuantidade] =
-    useState("");
+  // FORM
+  const [cliente, setCliente] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [produtoId, setProdutoId] = useState("");
+  const [quantidade, setQuantidade] = useState("");
+  const [valor, setValor] = useState("");
+  const [observacao, setObservacao] = useState("");
+  const [funcionarioId, setFuncionarioId] = useState("");
+  const [dataEntrega, setDataEntrega] = useState("");
+  const [horaEntrega, setHoraEntrega] = useState("");
 
-  const [filial, setFilial] =
-    useState("Paraná");
-
-  const [observacao, setObservacao] =
-    useState("");
-
-  const [cliente, setCliente] =
-    useState("");
-
-  const [funcionario, setFuncionario] =
-
-    useState("");
-
-
-const [dataEntrega,
-setDataEntrega] =
-  useState("");
-
-  const [encomendas, setEncomendas] =
-    useState([]);
-
-
-  // ===== CARREGAR ENCOMENDAS =====
   useEffect(() => {
-
-    const encomendasSalvas =
-      JSON.parse(
-        localStorage.getItem(
-          "encomendas"
-        )
-      ) || [];
-
-    setEncomendas(
-      encomendasSalvas
-    );
-
+    carregarDados();
   }, []);
 
-  // ===== ADICIONAR ENCOMENDA =====
-  function adicionarEncomenda() {
+  async function carregarDados() {
+    setLoading(true);
 
-    if (
-      !produto ||
-      !quantidade ||
-      !cliente
-    ) {
+    const { data: dataEncomendas } = await supabase
+      .from("encomenda")
+      .select("*, produto:produto_id(id, nome, unidade), funcionario:funcionario_id(id, nome)")
+      .order("data_criacao", { ascending: false });
 
-      alert(
-        "Preencha todos os campos!"
-      );
+    const { data: dataProdutos } = await supabase
+      .from("produto").select("*").order("nome");
 
+    const { data: dataFuncionarios } = await supabase
+      .from("funcionarios").select("*").order("nome");
+
+    setEncomendas(dataEncomendas || []);
+    setProdutos(dataProdutos || []);
+    setFuncionarios(dataFuncionarios || []);
+    setLoading(false);
+  }
+
+  async function adicionarEncomenda() {
+    if (!cliente || !produtoId || !quantidade) {
+      alert("Preencha os campos obrigatórios!");
       return;
-
     }
 
-   const novaEncomenda = {
+    const { error } = await supabase.from("encomenda").insert([{
+      cliente,
+      telefone: telefone ? Number(telefone) : null,
+      produto_id: Number(produtoId),
+      quantidade: Number(quantidade),
+      valor: valor ? Number(valor) : null,
+      observação: observacao,
+      status: "🟡 Em preparo",
+      funcionario_id: funcionarioId ? Number(funcionarioId) : null,
+      data_entrega: dataEntrega || null,
+      hora_entrega: horaEntrega || null,
+      data_criacao: new Date().toISOString().split("T")[0],
+    }]);
 
-  id: Date.now(),
+    if (error) {
+      alert("Erro ao salvar: " + error.message);
+      return;
+    }
 
-  produto,
-
-  quantidade,
-
-  filial,
-
-  observacao,
-
-  cliente,
-
-  funcionario,
-
-  dataEntrega,
-
-  data:
-    new Date()
-      .toLocaleDateString(),
-
-  status:
-    "🟡 Em preparo"
-
-};
-
-    const novaLista = [
-      novaEncomenda,
-      ...encomendas
-    ];
-
-    setEncomendas(
-      novaLista
-    );
-
-    localStorage.setItem(
-      "encomendas",
-      JSON.stringify(
-        novaLista
-      )
-    );
-
-    // LIMPAR
-    setProduto("");
-    setQuantidade("");
-    setObservacao("");
-    setCliente("");
-
-    alert(
-      "Encomenda enviada!"
-    );
-
+    carregarDados();
+    setCliente(""); setTelefone(""); setProdutoId(""); setQuantidade("");
+    setValor(""); setObservacao(""); setFuncionarioId(""); setDataEntrega(""); setHoraEntrega("");
   }
 
-  // ===== REMOVER =====
-  function removerEncomenda(id) {
-
-    const novaLista =
-      encomendas.filter(
-        (encomenda) =>
-          encomenda.id !== id
-      );
-
-    setEncomendas(
-      novaLista
-    );
-
-    localStorage.setItem(
-      "encomendas",
-      JSON.stringify(
-        novaLista
-      )
-    );
-
+  async function alterarStatus(id, novoStatus) {
+    await supabase.from("encomenda").update({ status: novoStatus }).eq("id", id);
+    carregarDados();
   }
 
-  // ===== FILTROS =====
-  const encomendasParana =
-    encomendas.filter(
-      (encomenda) =>
-        encomenda.filial ===
-        "Paraná"
-    );
+  async function removerEncomenda(id) {
+    if (!confirm("Remover esta encomenda?")) return;
+    await supabase.from("encomenda").delete().eq("id", id);
+    carregarDados();
+  }
 
-  const encomendasBrigadeiro =
-    encomendas.filter(
-      (encomenda) =>
-        encomenda.filial ===
-        "Brigadeiro"
-    );
-
-  const encomendasMelvin =
-    encomendas.filter(
-      (encomenda) =>
-        encomenda.filial ===
-        "Melvin"
-    );
+  const pendentes = encomendas.filter((e) => e.status !== "✅ Entregue");
+  const entregues = encomendas.filter((e) => e.status === "✅ Entregue");
 
   return (
-
     <main className={styles.body}>
 
-      {/* HEADER */}
       <div className={styles.header}>
-
-        <h1>
-          📋 Encomendas
-        </h1>
-
-        <p>
-          Encomendas para produção
-        </p>
-
+        <h1>🎂 Encomendas</h1>
+        <p>Controle de pedidos dos clientes</p>
       </div>
 
       {/* FORM */}
       <div className={styles.card}>
+        <h2>➕ Nova Encomenda</h2>
 
-        <h2>
-          ➕ Nova Encomenda
-        </h2>
+        <input className={styles.input} type="text" placeholder="Nome do cliente *" value={cliente} onChange={(e) => setCliente(e.target.value)} />
+        <input className={styles.input} type="tel" placeholder="Telefone" value={telefone} onChange={(e) => setTelefone(e.target.value)} />
 
-        {/* FILIAL */}
-        <select
-          value={filial}
-          onChange={(e) =>
-            setFilial(
-              e.target.value
-            )
-          }
-          className={styles.input}
-        >
-
-          <option value="Paraná">
-            Paraná
-          </option>
-
-          <option value="Brigadeiro">
-            Brigadeiro
-          </option>
-
-          <option value="Melvin">
-            Melvin
-          </option>
-
+        <select className={styles.input} value={produtoId} onChange={(e) => setProdutoId(e.target.value)}>
+          <option value="">Selecione o produto *</option>
+          {produtos.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}
         </select>
 
-        {/* PRODUTO */}
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Produto"
-          value={produto}
-          onChange={(e) =>
-            setProduto(
-              e.target.value
-            )
-          }
-        />
+        <input className={styles.input} type="number" placeholder="Quantidade *" value={quantidade} onChange={(e) => setQuantidade(e.target.value)} />
+        <input className={styles.input} type="number" placeholder="Valor (R$)" value={valor} onChange={(e) => setValor(e.target.value)} />
 
-        {/* QUANTIDADE */}
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Quantidade"
-          value={quantidade}
-          onChange={(e) =>
-            setQuantidade(
-              e.target.value
-            )
-          }
-        />
+        <textarea className={styles.textarea} placeholder="Observação" value={observacao} onChange={(e) => setObservacao(e.target.value)} />
 
-        {/* QUEM PEDIU */}
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Cliente"
-          value={cliente}
-          onChange={(e) =>
-            setCliente(
-              e.target.value
-            )
-          }
-        />
+        <select className={styles.input} value={funcionarioId} onChange={(e) => setFuncionarioId(e.target.value)}>
+          <option value="">Responsável (opcional)</option>
+          {funcionarios.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
+        </select>
 
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Funcionario"
-          value={funcionario}
-          onChange={(e) =>
-            setFuncionario(
-              e.target.value
-            )
-          }
+        <input className={styles.input} type="date" placeholder="Data de entrega" value={dataEntrega} onChange={(e) => setDataEntrega(e.target.value)} />
+        <input className={styles.input} type="time" placeholder="Hora de entrega" value={horaEntrega} onChange={(e) => setHoraEntrega(e.target.value)} />
 
-          
-        />
-
-        {/* DATA ENTREGA */}
-<input
-  className={styles.input}
-  type="date"
-  value={dataEntrega}
-  onChange={(e) =>
-    setDataEntrega(
-      e.target.value
-    )
-  }
-/>
-
-        {/* OBS */}
-        <textarea
-          className={styles.textarea}
-          placeholder="Observação"
-          value={observacao}
-          onChange={(e) =>
-            setObservacao(
-              e.target.value
-            )
-          }
-        />
-
-        <button
-          className={styles.button}
-          onClick={
-            adicionarEncomenda
-          }
-        >
-
-          Enviar Encomenda
-
-        </button>
-        
+        <button className={styles.button} onClick={adicionarEncomenda}>Salvar Encomenda</button>
       </div>
 
-      {/* PARANÁ */}
+      {loading && <div className={styles.card}><p>Carregando...</p></div>}
+
+      {/* PENDENTES */}
       <div className={styles.card}>
+        <h2>🟡 Em andamento ({pendentes.length})</h2>
+        {pendentes.length === 0 && <p>Nenhuma encomenda pendente.</p>}
+        {pendentes.map((enc) => (
+          <div key={enc.id} style={{ borderLeft: "5px solid #ff9800", background: "#fff9f0", borderRadius: "12px", padding: "14px", marginTop: "12px" }}>
+            <h3>👤 {enc.cliente}</h3>
+            {enc.telefone && <p>📞 {enc.telefone}</p>}
+            <p><b>Produto:</b> {enc.produto?.nome}</p>
+            <p><b>Quantidade:</b> {enc.quantidade} {enc.produto?.unidade}</p>
+            {enc.valor && <p><b>Valor:</b> R$ {Number(enc.valor).toFixed(2)}</p>}
+            {enc.data_entrega && <p><b>Entrega:</b> {enc.data_entrega} {enc.hora_entrega || ""}</p>}
+            {enc.funcionario?.nome && <p><b>Responsável:</b> {enc.funcionario.nome}</p>}
+            {enc.observação && <p><b>Obs:</b> {enc.observação}</p>}
 
-        <h2>
-          🏪 Paraná
-        </h2>
+            <select
+              style={{ width: "100%", padding: "10px", borderRadius: "10px", border: "1px solid #ccc", marginTop: "8px" }}
+              value={enc.status}
+              onChange={(e) => alterarStatus(enc.id, e.target.value)}
+            >
+              <option>🟡 Em preparo</option>
+              <option>🔵 Pronto</option>
+              <option>✅ Entregue</option>
+              <option>❌ Cancelado</option>
+            </select>
 
-        {
-          encomendasParana.length === 0 ? (
-
-            <p>
-              Nenhuma encomenda.
-            </p>
-
-          ) : (
-
-            encomendasParana.map(
-              (encomenda) => (
-
-                <div
-                  key={encomenda.id}
-                  className={styles.item}
-                >
-
-                  <h3>
-                    📦 {encomenda.produto}
-                  </h3>
-
-                  <p>
-                    <b>Quantidade:</b>{" "}
-                    {encomenda.quantidade}
-                  </p>
-
-                  <p>
-                    <b>Cliente:</b>{" "}
-                    {encomenda.cliente}
-                  </p>
-
-                  <p>
-                    <b>Funcionário:</b>{" "}
-                    {encomenda.funcionario}
-                  </p>
-
-                  <p>
-                    <b>Data do pedido:</b>{" "}
-                    {encomenda.data}
-                  </p>
-
-                  <p>
-                    <b>Entrega:</b>{" "}
-                    {encomenda.dataEntrega}
-                  </p>
-
-                  <p>
-                    <b>Status:</b>{" "}
-                    {encomenda.status}
-                  </p>
-
-                  {
-                    encomenda.observacao && (
-
-                      <p>
-                        <b>Obs:</b>{" "}
-                        {encomenda.observacao}
-                      </p>
-
-                    )
-                  }
-
-                  <button
-                    className={styles.remover}
-                    onClick={() =>
-                      removerEncomenda(
-                        encomenda.id
-                      )
-                    }
-                  >
-                    ❌ Remover
-                  </button>
-
-                </div>
-
-              )
-            )
-
-          )
-        }
-
+            <button
+              onClick={() => removerEncomenda(enc.id)}
+              style={{ marginTop: "8px", background: "#ef5350", color: "white", border: "none", borderRadius: "10px", padding: "8px 16px", cursor: "pointer", width: "100%" }}
+            >
+              ❌ Remover
+            </button>
+          </div>
+        ))}
       </div>
 
-      {/* BRIGADEIRO */}
-      <div className={styles.card}>
-
-        <h2>
-          🏪 Brigadeiro
-        </h2>
-
-        {
-          encomendasBrigadeiro.length === 0 ? (
-
-            <p>
-              Nenhuma encomenda.
-            </p>
-
-          ) : (
-
-            encomendasBrigadeiro.map(
-              (encomenda) => (
-
-                <div
-                  key={encomenda.id}
-                  className={styles.item}
-                >
-
-                  <h3>
-                    📦 {encomenda.produto}
-                  </h3>
-
-                  <p>
-                    <b>Quantidade:</b>{" "}
-                    {encomenda.quantidade}
-                  </p>
-
-                  <p>
-                    <b>Cliente:</b>{" "}
-                    {encomenda.cliente}
-                  </p>
-
-                  <p>
-                    <b>Funcionário:</b>{" "}
-                    {encomenda.funcionario}
-                  </p>
-
-                  <p>
-                    <b>Data do pedido:</b>{" "}
-                    {encomenda.data}
-                  </p>
-
-                  <p>
-                    <b>Entrega:</b>{" "}
-                    {encomenda.dataEntrega}
-                  </p>
-
-                  <p>
-                    <b>Status:</b>{" "}
-                    {encomenda.status}
-                  </p>
-
-                  {
-                    encomenda.observacao && (
-
-                      <p>
-                        <b>Obs:</b>{" "}
-                        {encomenda.observacao}
-                      </p>
-
-                    )
-                  }
-
-                  <button
-                    className={styles.remover}
-                    onClick={() =>
-                      removerEncomenda(
-                        encomenda.id
-                      )
-                    }
-                  >
-                    ❌ Remover
-                  </button>
-
-                </div>
-
-              )
-            )
-
-          )
-        }
-
-      </div>
-
-      {/* MELVIN */}
-      <div className={styles.card}>
-
-        <h2>
-          🏪 Melvin
-        </h2>
-
-        {
-          encomendasMelvin.length === 0 ? (
-
-            <p>
-              Nenhuma encomenda.
-            </p>
-
-          ) : (
-
-            encomendasMelvin.map(
-              (encomenda) => (
-
-                <div
-                  key={encomenda.id}
-                  className={styles.item}
-                >
-
-                  <h3>
-                    📦 {encomenda.produto}
-                  </h3>
-
-                  <p>
-                    <b>Quantidade:</b>{" "}
-                    {encomenda.quantidade}
-                  </p>
-
-                  <p>
-                    <b>Cliente:</b>{" "}
-                    {encomenda.cliente}
-                  </p>
-
-                  <p>
-                    <b>Funcionário:</b>{" "}
-                    {encomenda.funcionario}
-                  </p>
-
-                  <p>
-                    <b>Data do pedido:</b>{" "}
-                    {encomenda.data}
-                  </p>
-
-                  <p>
-                    <b>Entrega:</b>{" "}
-                    {encomenda.dataEntrega}
-                  </p>
-
-                  <p>
-                    <b>Status:</b>{" "}
-                    {encomenda.status}
-                  </p>
-
-                  {
-                    encomenda.observacao && (
-
-                      <p>
-                        <b>Obs:</b>{" "}
-                        {encomenda.observacao}
-                      </p>
-
-                    )
-                  }
-
-                  <button
-                    className={styles.remover}
-                    onClick={() =>
-                      removerEncomenda(
-                        encomenda.id
-                      )
-                    }
-                  >
-                    ❌ Remover
-                  </button>
-
-                </div>
-
-              )
-            )
-
-          )
-        }
-
-      </div>
+      {/* ENTREGUES */}
+      {entregues.length > 0 && (
+        <div className={styles.card}>
+          <h2>✅ Entregues ({entregues.length})</h2>
+          {entregues.map((enc) => (
+            <div key={enc.id} style={{ borderLeft: "5px solid #43a047", background: "#f0fff4", borderRadius: "12px", padding: "14px", marginTop: "12px" }}>
+              <h3>👤 {enc.cliente}</h3>
+              <p><b>Produto:</b> {enc.produto?.nome} — {enc.quantidade} {enc.produto?.unidade}</p>
+              {enc.data_entrega && <p><b>Entregue em:</b> {enc.data_entrega}</p>}
+            </div>
+          ))}
+        </div>
+      )}
 
     </main>
-
   );
-
 }

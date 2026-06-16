@@ -1,145 +1,100 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { supabase } from "@/app/lib/supabase";
 import styles from "./page.module.css";
-
-// ===== TAREFAS (fora do componente) =====
-const TAREFAS = {
-  diandres: [
-    "Limpeza da bancada",
-    "Limpeza do chão",
-    "Limpeza do balcão",
-    "Organizar e repor a mercearia",
-    "Limpeza da máquina de café",
-  ],
-  leidi: [
-    "Reposição dos frios",
-    "Limpeza do chão",
-    "Limpeza da chapa",
-    "Produtos",
-  ],
-  lenir: [
-    "Reposição e corte dos frios",
-    "Limpeza do chão",
-    "Reposição dos pães",
-    "Anotar sobras",
-  ],
-  andreina: [
-    "Limpeza da bancada",
-    "Limpeza do chão",
-    "Limpeza do balcão",
-    "Mesa dos pães",
-    "Verificar validade",
-  ],
-  karla: [
-    "Reposição dos pães",
-    "Organização dos cestinhos",
-    "Verificar validade",
-    "Mesa dos pães",
-  ],
-};
 
 export default function Escalas() {
 
-  // ===== STATES =====
-  const [usuarioLogado, setUsuarioLogado] = useState(null); // null = carregando
-  const [tipoUsuario, setTipoUsuario]     = useState("");
-  const [progresso, setProgresso]         = useState({});
-  const [anotacao, setAnotacao]           = useState("");
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [tipoUsuario, setTipoUsuario] = useState("");
+  const [escalas, setEscalas] = useState([]);
+  const [anotacao, setAnotacao] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [todasEscalas, setTodasEscalas] = useState([]);
+
+  const hoje = new Date().toISOString().split("T")[0];
 
   // ===== CARREGAR SESSÃO =====
   useEffect(() => {
     const salvo = localStorage.getItem("usuarioLogado");
-
     if (salvo) {
       const dados = JSON.parse(salvo);
-      const user  = dados.usuario;
-
-      setUsuarioLogado(user);
+      setUsuarioLogado(dados.usuario);
       setTipoUsuario(dados.funcao || dados.tipo || "");
-
-      // Carregar progresso salvo
-      const progressoSalvo = localStorage.getItem("progresso_" + user);
-      if (progressoSalvo) setProgresso(JSON.parse(progressoSalvo));
-
-      // Carregar anotação salva
-      const anotacaoSalva = localStorage.getItem("anotacao_" + user);
-      if (anotacaoSalva) setAnotacao(anotacaoSalva);
-
+      const anot = localStorage.getItem("anotacao_" + dados.usuario);
+      if (anot) setAnotacao(anot);
     } else {
-      setUsuarioLogado(false); // não logado
+      setUsuarioLogado(false);
     }
   }, []);
 
-  // ===== SAIR =====
+  useEffect(() => {
+    if (usuarioLogado) carregarEscalas();
+  }, [usuarioLogado]);
+
+  async function carregarEscalas() {
+    setLoading(true);
+    const isAdmin = tipoUsuario === "admin" || usuarioLogado === "admin";
+
+    if (isAdmin) {
+      // Admin vê tudo do dia
+      const { data } = await supabase
+        .from("escala")
+        .select("*, funcionario:funcionario_id(id, nome)")
+        .eq("data", hoje)
+        .order("id");
+      setTodasEscalas(data || []);
+    } else {
+      // Busca o funcionario_id pelo nome
+      const { data: funcData } = await supabase
+        .from("funcionarios")
+        .select("id")
+        .ilike("nome", usuarioLogado)
+        .limit(1);
+
+      if (funcData && funcData.length > 0) {
+        const funcId = funcData[0].id;
+        const { data } = await supabase
+          .from("escala")
+          .select("*")
+          .eq("funcionario_id", funcId)
+          .eq("data", hoje)
+          .order("id");
+        setEscalas(data || []);
+      }
+    }
+
+    setLoading(false);
+  }
+
   function sair() {
     localStorage.removeItem("usuarioLogado");
     setUsuarioLogado(false);
-    setProgresso({});
-    setAnotacao("");
+    setEscalas([]);
   }
 
-  // ===== SALVAR CHECK =====
-  function salvar(index, status) {
-    const novo = { ...progresso, [index]: status };
-    setProgresso(novo);
-    localStorage.setItem("progresso_" + usuarioLogado, JSON.stringify(novo));
+  async function alterarStatus(id, novoStatus) {
+    await supabase.from("escala").update({ status: novoStatus }).eq("id", id);
+    carregarEscalas();
   }
 
-  // ===== SALVAR ANOTAÇÃO =====
   function salvarAnotacao() {
     localStorage.setItem("anotacao_" + usuarioLogado, anotacao);
     alert("Anotação salva!");
   }
 
-  // ===== CALCULAR PROGRESSO =====
-  function calcularPorcentagem(user) {
-    const dados =
-      user === usuarioLogado
-        ? progresso
-        : JSON.parse(localStorage.getItem("progresso_" + user)) || {};
+  const isAdmin = tipoUsuario === "admin" || usuarioLogado === "admin";
 
-    const total  = TAREFAS[user]?.length || 0;
-    if (total === 0) return 0;
+  // Agrupar para admin
+  const porFuncionario = {};
+  todasEscalas.forEach((e) => {
+    const nome = e.funcionario?.nome || "Sem nome";
+    if (!porFuncionario[nome]) porFuncionario[nome] = [];
+    porFuncionario[nome].push(e);
+  });
 
-    const feitas = Object.values(dados).filter((v) => v).length;
-    return Math.round((feitas / total) * 100);
-  }
-
-  // ===== PAINEL ADMIN =====
-  function renderAdmin() {
-    return (
-      <div className={styles.card}>
-        <h3>📊 Painel Geral</h3>
-
-        {Object.keys(TAREFAS).map((user) => {
-          const porcentagem = calcularPorcentagem(user);
-          const anot = localStorage.getItem("anotacao_" + user) || "Sem anotação";
-
-          return (
-            <div key={user} className={styles.adminCard}>
-              <strong>{user}</strong>
-              <p>{porcentagem}% concluído</p>
-
-              <div className={styles.progresso}>
-                <div
-                  className={styles.barra}
-                  style={{ width: `${porcentagem}%` }}
-                />
-              </div>
-
-              <p><b>Anotação:</b> {anot}</p>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  // ===== GUARDS =====
-  if (usuarioLogado === null) {
-    return <p>Carregando...</p>;
-  }
+  if (usuarioLogado === null) return <p>Carregando...</p>;
 
   if (usuarioLogado === false) {
     return (
@@ -149,10 +104,10 @@ export default function Escalas() {
     );
   }
 
-  const isAdmin     = tipoUsuario === "admin" || usuarioLogado === "admin";
-  const porcentagem = !isAdmin ? calcularPorcentagem(usuarioLogado) : 0;
+  const total = escalas.length;
+  const feitas = escalas.filter((e) => e.status === "Concluído").length;
+  const porcentagem = total > 0 ? Math.round((feitas / total) * 100) : 0;
 
-  // ===== TELA PRINCIPAL =====
   return (
     <main className={styles.body}>
       <div className={styles.container}>
@@ -163,21 +118,53 @@ export default function Escalas() {
           <button className={styles.buttonSair} onClick={sair}>Sair</button>
         </div>
 
-        {isAdmin ? renderAdmin() : (
-          <>
-            {/* TAREFAS */}
-            <div className={styles.card}>
-              <h3>📋 Suas tarefas</h3>
+        {loading && <div className={styles.card}><p>Carregando...</p></div>}
 
-              {(TAREFAS[usuarioLogado] || []).map((tarefa, index) => (
-                <div key={index} className={styles.item}>
+        {isAdmin ? (
+          /* PAINEL ADMIN */
+          <div className={styles.card}>
+            <h3>📊 Painel Geral — {hoje}</h3>
+            {todasEscalas.length === 0 && <p>Sem escalas cadastradas para hoje.</p>}
+            {Object.entries(porFuncionario).map(([nome, tarefas]) => {
+              const tot = tarefas.length;
+              const feit = tarefas.filter((t) => t.status === "Concluído").length;
+              const pct = tot > 0 ? Math.round((feit / tot) * 100) : 0;
+              return (
+                <div key={nome} className={styles.adminCard}>
+                  <strong>👤 {nome}</strong>
+                  <p>{pct}% concluído ({feit}/{tot})</p>
+                  <div className={styles.progresso}>
+                    <div className={styles.barra} style={{ width: `${pct}%` }} />
+                  </div>
+                  {tarefas.map((t) => (
+                    <p key={t.id} style={{ color: t.status === "Concluído" ? "#2e7d32" : "#555", marginTop: "4px" }}>
+                      {t.status === "Concluído" ? "✅" : "⬜"} {t.tarefa}
+                    </p>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <>
+            {/* TAREFAS DO USUÁRIO */}
+            <div className={styles.card}>
+              <h3>📋 Suas tarefas — {hoje}</h3>
+
+              {escalas.length === 0 && <p>Nenhuma tarefa para hoje.</p>}
+
+              {escalas.map((e) => (
+                <div key={e.id} className={styles.item}>
                   <label>
                     <input
                       type="checkbox"
-                      checked={progresso[index] || false}
-                      onChange={(e) => salvar(index, e.target.checked)}
+                      checked={e.status === "Concluído"}
+                      onChange={() => alterarStatus(e.id, e.status === "Concluído" ? "Pendente" : "Concluído")}
                     />
-                    {" "}{tarefa}
+                    {" "}
+                    <span style={{ textDecoration: e.status === "Concluído" ? "line-through" : "none" }}>
+                      {e.tarefa}
+                    </span>
                   </label>
                 </div>
               ))}
@@ -191,18 +178,15 @@ export default function Escalas() {
             {/* ANOTAÇÕES */}
             <div className={styles.card}>
               <h3>📝 Anotações</h3>
-
               <textarea
                 className={styles.textarea}
                 rows="5"
                 value={anotacao}
                 onChange={(e) => setAnotacao(e.target.value)}
               />
-
               <button className={styles.button} onClick={salvarAnotacao}>
                 Salvar anotação
               </button>
-              
             </div>
           </>
         )}

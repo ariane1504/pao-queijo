@@ -1,485 +1,174 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/app/lib/supabase";
 import styles from "./page.module.css";
 
 export default function EscalaAdmin() {
 
-  // ===== FUNCIONÁRIOS =====
-  const [funcionarios, setFuncionarios] =
-    useState([
-      {
-        id: 1,
-        nome: "Diandres",
+  const [funcionarios, setFuncionarios] = useState([]);
+  const [escalas, setEscalas] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-        tarefas: [
-          "Limpeza da bancada",
-          "Limpeza do chão",
-          "Limpeza do balcão",
-          "Organizar mercearia",
-          "Máquina de café"
-        ]
-      },
+  // FORM
+  const [funcionarioId, setFuncionarioId] = useState("");
+  const [data, setData] = useState(new Date().toISOString().split("T")[0]);
+  const [setor, setSetor] = useState("");
+  const [tarefa, setTarefa] = useState("");
+  const [status, setStatus] = useState("Pendente");
 
-      {
-        id: 2,
-        nome: "Leidi",
+  // FILTRO DE DATA
+  const [filtroData, setFiltroData] = useState(new Date().toISOString().split("T")[0]);
 
-        tarefas: [
-          "Reposição dos frios",
-          "Limpeza do chão",
-          "Limpeza da chapa",
-          "Produtos"
-        ]
-      },
+  useEffect(() => {
+    carregarDados();
+  }, [filtroData]);
 
-      {
-        id: 3,
-        nome: "Lenir",
+  async function carregarDados() {
+    setLoading(true);
 
-        tarefas: [
-          "Reposição e corte dos frios",
-          "Limpeza do chão",
-          "Reposição dos pães",
-          "Anotar sobras"
-        ]
-      },
+    const { data: dataFuncs } = await supabase
+      .from("funcionarios").select("*").order("nome");
 
-      {
-        id: 4,
-        nome: "Andreina",
+    const { data: dataEscalas } = await supabase
+      .from("escala")
+      .select("*, funcionario:funcionario_id(id, nome)")
+      .eq("data", filtroData)
+      .order("id");
 
-        tarefas: [
-          "Limpeza bancada",
-          "Limpeza chão",
-          "Limpeza balcão",
-          "Mesa dos pães",
-          "Verificar validade"
-        ]
-      },
-
-      {
-        id: 5,
-        nome: "Karla",
-
-        tarefas: [
-          "Reposição dos pães",
-          "Cestinhos",
-          "Verificar validade",
-          "Mesa dos pães"
-        ]
-      }
-    ]);
-
-  // ===== CHECKLIST =====
-  const [concluidas, setConcluidas] =
-    useState({});
-
-  // ===== OBS =====
-  const [observacoes, setObservacoes] =
-    useState({});
-
-  // ===== NOVO FUNC =====
-  const [novoFuncionario,
-  setNovoFuncionario] =
-    useState("");
-
-  // ===== NOVA TAREFA =====
-  const [novaTarefa,
-  setNovaTarefa] =
-    useState("");
-
-  // ===== FUNCIONÁRIO SELECIONADO =====
-  const [
-    funcionarioSelecionado,
-    setFuncionarioSelecionado
-  ] = useState("");
-
-  // ===== CHECK =====
-  function toggleCheck(funcionario, index) {
-
-    const chave =
-      `${funcionario}-${index}`;
-
-    setConcluidas({
-      ...concluidas,
-      [chave]: !concluidas[chave]
-    });
-
+    setFuncionarios(dataFuncs || []);
+    setEscalas(dataEscalas || []);
+    setLoading(false);
   }
 
-  // ===== OBS =====
-  function alterarObs(nome, texto) {
+  async function adicionarEscala() {
+    if (!funcionarioId || !tarefa) {
+      alert("Selecione o funcionário e informe a tarefa.");
+      return;
+    }
 
-    setObservacoes({
-      ...observacoes,
-      [nome]: texto
-    });
+    const { error } = await supabase.from("escala").insert([{
+      funcionario_id: Number(funcionarioId),
+      data,
+      setor,
+      tarefa,
+      status,
+    }]);
 
+    if (error) { alert("Erro: " + error.message); return; }
+    carregarDados();
+    setTarefa(""); setSetor("");
   }
 
-  // ===== ADD FUNCIONÁRIO =====
-  function adicionarFuncionario() {
-
-    if (!novoFuncionario) return;
-
-    const novo = {
-      id: Date.now(),
-      nome: novoFuncionario,
-      tarefas: []
-    };
-
-    setFuncionarios([
-      ...funcionarios,
-      novo
-    ]);
-
-    setNovoFuncionario("");
+  async function alterarStatus(id, novoStatus) {
+    await supabase.from("escala").update({ status: novoStatus }).eq("id", id);
+    carregarDados();
   }
 
-  // ===== ADD TAREFA =====
-  function adicionarTarefa() {
-
-    if (
-      !novaTarefa ||
-      !funcionarioSelecionado
-    ) return;
-
-    const atualizados =
-      funcionarios.map((func) => {
-
-        if (
-          func.nome ===
-          funcionarioSelecionado
-        ) {
-
-          return {
-
-            ...func,
-
-            tarefas: [
-              ...func.tarefas,
-              novaTarefa
-            ]
-          };
-
-        }
-
-        return func;
-
-      });
-
-    setFuncionarios(atualizados);
-
-    setNovaTarefa("");
+  async function removerEscala(id) {
+    await supabase.from("escala").delete().eq("id", id);
+    carregarDados();
   }
 
-  // ===== REMOVER TAREFA =====
-  function removerTarefa(
-    funcionarioNome,
-    tarefaIndex
-  ) {
-
-    const atualizados =
-      funcionarios.map((func) => {
-
-        if (
-          func.nome === funcionarioNome
-        ) {
-
-          return {
-
-            ...func,
-
-            tarefas:
-              func.tarefas.filter(
-                (_, index) =>
-                  index !== tarefaIndex
-              )
-
-          };
-
-        }
-
-        return func;
-
-      });
-
-    setFuncionarios(atualizados);
-
-  }
-
-  // ===== REMOVER FUNC =====
-  function removerFuncionario(id) {
-
-    const novaLista =
-      funcionarios.filter(
-        (func) => func.id !== id
-      );
-
-    setFuncionarios(novaLista);
-
-  }
+  // Agrupar por funcionário
+  const porFuncionario = {};
+  escalas.forEach((e) => {
+    const nome = e.funcionario?.nome || "Sem nome";
+    if (!porFuncionario[nome]) porFuncionario[nome] = [];
+    porFuncionario[nome].push(e);
+  });
 
   return (
-
     <main className={styles.body}>
 
-      {/* HEADER */}
       <div className={styles.header}>
-
-        <h1>
-          📋 Escala das Meninas
-        </h1>
-
-        <p>
-          Controle das tarefas
-        </p>
-
+        <h1>📋 Escala — Admin</h1>
+        <p>Gerenciar tarefas e escalas</p>
       </div>
 
-      {/* ADMIN */}
+      {/* FORM */}
       <div className={styles.card}>
+        <h2>⚙️ Adicionar Escala</h2>
 
-        <h2>
-          ⚙️ Gerenciar Escala
-        </h2>
-
-        {/* FUNCIONÁRIO */}
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Novo funcionário"
-          value={novoFuncionario}
-          onChange={(e) =>
-            setNovoFuncionario(
-              e.target.value
-            )
-          }
-        />
-
-        <button
-          className={styles.button}
-          onClick={adicionarFuncionario}
-        >
-          Adicionar funcionário
-        </button>
-
-        {/* SELECT */}
-        <select
-          className={styles.input}
-          value={funcionarioSelecionado}
-          onChange={(e) =>
-            setFuncionarioSelecionado(
-              e.target.value
-            )
-          }
-        >
-
-          <option value="">
-            Selecione funcionário
-          </option>
-
-          {funcionarios.map((func) => (
-
-            <option
-              key={func.id}
-              value={func.nome}
-            >
-              {func.nome}
-            </option>
-
-          ))}
-
+        <select className={styles.input} value={funcionarioId} onChange={(e) => setFuncionarioId(e.target.value)}>
+          <option value="">Selecione o funcionário</option>
+          {funcionarios.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
         </select>
 
-        {/* NOVA TAREFA */}
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Nova tarefa"
-          value={novaTarefa}
-          onChange={(e) =>
-            setNovaTarefa(
-              e.target.value
-            )
-          }
-        />
+        <input className={styles.input} type="date" value={data} onChange={(e) => setData(e.target.value)} />
+        <input className={styles.input} type="text" placeholder="Setor (opcional)" value={setor} onChange={(e) => setSetor(e.target.value)} />
+        <input className={styles.input} type="text" placeholder="Tarefa" value={tarefa} onChange={(e) => setTarefa(e.target.value)} />
 
-        <button
-          className={styles.button}
-          onClick={adicionarTarefa}
-        >
-          Adicionar tarefa
-        </button>
+        <select className={styles.input} value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option value="Pendente">Pendente</option>
+          <option value="Em andamento">Em andamento</option>
+          <option value="Concluído">Concluído</option>
+        </select>
 
+        <button className={styles.button} onClick={adicionarEscala}>Adicionar tarefa</button>
       </div>
 
-      {/* ESCALAS */}
-      {funcionarios.map((funcionario) => {
+      {/* FILTRO DATA */}
+      <div className={styles.card}>
+        <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>📅 Ver escalas do dia:</label>
+        <input
+          className={styles.input}
+          type="date"
+          value={filtroData}
+          onChange={(e) => setFiltroData(e.target.value)}
+        />
+      </div>
 
-        const total =
-          funcionario.tarefas.length;
+      {loading && <div className={styles.card}><p>Carregando...</p></div>}
 
-        const feitas =
-          funcionario.tarefas.filter(
-            (_, index) =>
-              concluidas[
-                `${funcionario.nome}-${index}`
-              ]
-          ).length;
-
-        const porcentagem =
-          total > 0
-            ? Math.round(
-                (feitas / total) * 100
-              )
-            : 0;
+      {/* ESCALAS AGRUPADAS POR FUNCIONÁRIO */}
+      {Object.entries(porFuncionario).map(([nome, tarefas]) => {
+        const total = tarefas.length;
+        const feitas = tarefas.filter((t) => t.status === "Concluído").length;
+        const pct = total > 0 ? Math.round((feitas / total) * 100) : 0;
 
         return (
-
-          <div
-            key={funcionario.id}
-            className={styles.card}
-          >
-
-            {/* TOPO */}
+          <div key={nome} className={styles.card}>
             <div className={styles.topo}>
-
               <div>
-
-                <h2>
-                  👤 {funcionario.nome}
-                </h2>
-
-                <p>
-                  {feitas} de {total}
-                  concluídas
-                </p>
-
+                <h2>👤 {nome}</h2>
+                <p>{feitas} de {total} concluídas</p>
               </div>
-
               <div className={styles.acoes}>
-
-                <div
-                  className={
-                    styles.porcentagem
-                  }
-                >
-                  {porcentagem}%
-                </div>
-
-                <button
-                  className={
-                    styles.removerFunc
-                  }
-                  onClick={() =>
-                    removerFuncionario(
-                      funcionario.id
-                    )
-                  }
-                >
-                  ❌
-                </button>
-
+                <div className={styles.porcentagem}>{pct}%</div>
               </div>
-
             </div>
 
-            {/* BARRA */}
             <div className={styles.progresso}>
-
-              <div
-                className={styles.barra}
-                style={{
-                  width:
-                    porcentagem + "%"
-                }}
-              />
-
+              <div className={styles.barra} style={{ width: pct + "%" }} />
             </div>
 
-            {/* TAREFAS */}
             <div className={styles.lista}>
-
-              {funcionario.tarefas.map(
-                (tarefa, index) => (
-
-                  <div
-                    key={index}
-                    className={styles.item}
-                  >
-
-                    <label
-                      className={
-                        styles.label
-                      }
-                    >
-
-                      <input
-                        type="checkbox"
-                        checked={
-                          concluidas[
-                            `${funcionario.nome}-${index}`
-                          ] || false
-                        }
-                        onChange={() =>
-                          toggleCheck(
-                            funcionario.nome,
-                            index
-                          )
-                        }
-                      />
-
-                      <span>
-                        {tarefa}
-                      </span>
-
-                    </label>
-
-                    <button
-                      className={
-                        styles.remover
-                      }
-                      onClick={() =>
-                        removerTarefa(
-                          funcionario.nome,
-                          index
-                        )
-                      }
-                    >
-                      ❌
-                    </button>
-
-                  </div>
-
-                )
-              )}
-
+              {tarefas.map((t) => (
+                <div key={t.id} className={styles.item}>
+                  <label className={styles.label}>
+                    <input
+                      type="checkbox"
+                      checked={t.status === "Concluído"}
+                      onChange={() => alterarStatus(t.id, t.status === "Concluído" ? "Pendente" : "Concluído")}
+                    />
+                    <span style={{ textDecoration: t.status === "Concluído" ? "line-through" : "none" }}>
+                      {t.tarefa} {t.setor && <small style={{ color: "#888" }}>({t.setor})</small>}
+                    </span>
+                  </label>
+                  <button className={styles.remover} onClick={() => removerEscala(t.id)}>❌</button>
+                </div>
+              ))}
             </div>
-
-            {/* OBS */}
-            <textarea
-              className={styles.textarea}
-              placeholder="Observações..."
-              value={
-                observacoes[
-                  funcionario.nome
-                ] || ""
-              }
-              onChange={(e) =>
-                alterarObs(
-                  funcionario.nome,
-                  e.target.value
-                )
-              }
-            />
-
           </div>
-
         );
-
       })}
+
+      {escalas.length === 0 && !loading && (
+        <div className={styles.card}>
+          <p>Nenhuma escala para {filtroData}.</p>
+        </div>
+      )}
 
     </main>
   );

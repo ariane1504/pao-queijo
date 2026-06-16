@@ -1,296 +1,189 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/app/lib/supabase";
 import styles from "./page.module.css";
 
 export default function Estoque() {
 
-  // ===== ESTOQUE =====
-  const [estoque, setEstoque] =
-    useState([
+  // ===== STATES =====
+  const [estoque, setEstoque] = useState([]);
+  const [produtos, setProdutos] = useState([]);
+  const [produtoSelecionado, setProdutoSelecionado] = useState("");
+  const [quantidade, setQuantidade] = useState("");
+  const [pesquisa, setPesquisa] = useState("");
+  const [loading, setLoading] = useState(false);
 
-      {
-        id: 1,
-        produto: "Farinha",
-        categoria: "Matéria-prima",
-        quantidade: 15,
-        unidade: "sacos",
-        minimo: 5
-      },
+  // ===== CARREGAR =====
+  useEffect(() => {
+    carregarDados();
+  }, []);
 
-      {
-        id: 2,
-        produto: "Margarina",
-        categoria: "Matéria-prima",
-        quantidade: 2,
-        unidade: "baldes",
-        minimo: 3
-      },
+  async function carregarDados() {
+    setLoading(true);
 
-      {
-        id: 3,
-        produto: "Presunto",
-        categoria: "Frios",
-        quantidade: 12,
-        unidade: "kg",
-        minimo: 5
-      }
+    const { data: dataProdutos } = await supabase
+      .from("produto")
+      .select("*")
+      .order("nome");
 
-    ]);
+    const { data: dataEstoque } = await supabase
+      .from("estoque")
+      .select("*, produto:produto_id(id, nome, categoria, unidade)")
+      .order("id");
 
-  // ===== FORM =====
-  const [produto, setProduto] =
-    useState("");
+    setProdutos(dataProdutos || []);
+    setEstoque(dataEstoque || []);
+    setLoading(false);
+  }
 
-  const [quantidade, setQuantidade] =
-    useState("");
-
-  const [categoria, setCategoria] =
-    useState("Padaria");
-
-  // ===== ADICIONAR =====
-  function adicionarProduto() {
-
-    if (!produto || !quantidade) {
-
-      alert("Preencha tudo!");
-
+  // ===== ADICIONAR / ATUALIZAR =====
+  async function adicionarEstoque() {
+    if (!produtoSelecionado || !quantidade) {
+      alert("Selecione o produto e informe a quantidade.");
       return;
-
     }
 
-    const novoProduto = {
+    const produtoId = Number(produtoSelecionado);
+    const existente = estoque.find((e) => e.produto_id === produtoId);
 
-      id: Date.now(),
+    if (existente) {
+      const novaQtd = Number(existente.quantidade) + Number(quantidade);
+      const { error } = await supabase
+        .from("estoque")
+        .update({ quantidade: novaQtd })
+        .eq("id", existente.id);
 
-      produto,
+      if (error) {
+        alert("Erro ao atualizar: " + error.message);
+        return;
+      }
+    } else {
+      const { error } = await supabase
+        .from("estoque")
+        .insert([{
+          produto_id: produtoId,
+          quantidade: Number(quantidade),
+          estoque_minimo: 0,
+        }]);
 
-      categoria,
+      if (error) {
+        alert("Erro ao inserir: " + error.message);
+        return;
+      }
+    }
 
-      quantidade: Number(quantidade),
-
-      unidade: "un",
-
-      minimo: 5
-
-    };
-
-    setEstoque([
-      novoProduto,
-      ...estoque
-    ]);
-
-    setProduto("");
+    carregarDados();
+    setProdutoSelecionado("");
     setQuantidade("");
-
   }
 
-  // ===== REMOVER =====
-  function removerProduto(id) {
+  // ===== FILTRO =====
+  const estoqueFiltrado = estoque.filter((item) =>
+    item.produto?.nome?.toLowerCase().includes(pesquisa.toLowerCase())
+  );
 
-    const novo =
-      estoque.filter(
-        (item) =>
-          item.id !== id
-      );
-
-    setEstoque(novo);
-
-  }
-
-  // ===== TOTAL =====
-  const totalItens =
-    estoque.length;
+  const totalItens = estoque.length;
+  const alertas = estoque.filter(
+    (item) => item.estoque_minimo && item.quantidade <= item.estoque_minimo
+  );
 
   return (
-
     <main className={styles.body}>
 
       {/* HEADER */}
       <div className={styles.header}>
-
-        <h1>
-          📦 Controle de Estoque
-        </h1>
-
-        <p>
-          Produtos disponíveis
-        </p>
-
+        <h1>📦 Controle de Estoque</h1>
+        <p>Adicionar produtos disponíveis</p>
       </div>
+
+      {/* ALERTAS */}
+      {alertas.length > 0 && (
+        <div className={styles.card} style={{ borderLeft: "6px solid #ef5350" }}>
+          <h3>⚠️ {alertas.length} produto(s) com estoque baixo</h3>
+          {alertas.map((item) => (
+            <p key={item.id} style={{ color: "#c62828" }}>
+              ❗ {item.produto?.nome} — apenas {item.quantidade} {item.produto?.unidade}
+            </p>
+          ))}
+        </div>
+      )}
 
       {/* FORM */}
       <div className={styles.card}>
+        <h2>➕ Adicionar ao Estoque</h2>
 
-        <h2>
-          ➕ Adicionar Produto
-        </h2>
-
-        {/* CATEGORIA */}
         <select
           className={styles.input}
-          value={categoria}
-          onChange={(e) =>
-            setCategoria(
-              e.target.value
-            )
-          }
+          value={produtoSelecionado}
+          onChange={(e) => setProdutoSelecionado(e.target.value)}
         >
-
-          <option>
-            Padaria
-          </option>
-
-          <option>
-            Frios
-          </option>
-
-          <option>
-            Limpeza
-          </option>
-
-          <option>
-            Bebidas
-          </option>
-
-          <option>
-            Mercearia
-          </option>
-
+          <option value="">Selecione o produto</option>
+          {produtos.map((p) => (
+            <option key={p.id} value={p.id}>{p.nome} ({p.unidade})</option>
+          ))}
         </select>
 
-        {/* PRODUTO */}
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Nome do produto"
-          value={produto}
-          onChange={(e) =>
-            setProduto(
-              e.target.value
-            )
-          }
-        />
-
-        {/* QUANTIDADE */}
         <input
           className={styles.input}
           type="number"
-          placeholder="Quantidade"
+          placeholder="Quantidade a adicionar"
           value={quantidade}
-          onChange={(e) =>
-            setQuantidade(
-              e.target.value
-            )
-          }
+          onChange={(e) => setQuantidade(e.target.value)}
         />
 
-        <button
-          className={styles.button}
-          onClick={adicionarProduto}
-        >
-
+        <button className={styles.button} onClick={adicionarEstoque}>
           Salvar Produto
-
         </button>
-
       </div>
 
       {/* RESUMO */}
       <div className={styles.resumo}>
+        📊 Total de produtos: <strong>{totalItens}</strong>
+      </div>
 
-        📊 Total de produtos:
-
-        <strong>
-          {" "}
-          {totalItens}
-        </strong>
-
+      {/* PESQUISA */}
+      <div className={styles.card}>
+        <input
+          className={styles.input}
+          type="text"
+          placeholder="🔍 Pesquisar produto"
+          value={pesquisa}
+          onChange={(e) => setPesquisa(e.target.value)}
+        />
       </div>
 
       {/* LISTA */}
       <div className={styles.lista}>
+        {loading && <div className={styles.card}><p>Carregando...</p></div>}
 
-        {estoque.length === 0 && (
-
-          <div className={styles.card}>
-
-            Nenhum produto cadastrado.
-
-          </div>
-
+        {!loading && estoqueFiltrado.length === 0 && (
+          <div className={styles.card}>Nenhum produto encontrado.</div>
         )}
 
-        {estoque.map((item) => (
-
-          <div
-            key={item.id}
-            className={`${styles.item}
-            ${
-              item.quantidade <= item.minimo
-                ? styles.alerta
-                : ""
-            }`}
-          >
-
-            <div>
-
-              <h3>
-                📦 {item.produto}
-              </h3>
-
-              {
-                item.quantidade <= item.minimo && (
-
-                  <div className={styles.aviso}>
-
-                    ⚠️ Estoque baixo
-
-                  </div>
-
-                )
-              }
-
-              <p>
-
-                <b>Categoria:</b>{" "}
-                {item.categoria}
-
-              </p>
-
-              <p>
-
-                <b>Quantidade:</b>{" "}
-                {item.quantidade} {item.unidade}
-
-              </p>
-
-              <p>
-
-                <b>Mínimo:</b>{" "}
-                {item.minimo}
-
-              </p>
-
-            </div>
-
-            <button
-              className={styles.remover}
-              onClick={() =>
-                removerProduto(
-                  item.id
-                )
-              }
+        {estoqueFiltrado.map((item) => {
+          const baixo = item.estoque_minimo && item.quantidade <= item.estoque_minimo;
+          return (
+            <div
+              key={item.id}
+              className={`${styles.item} ${baixo ? styles.alerta : ""}`}
             >
+              <div>
+                <h3>📦 {item.produto?.nome}</h3>
 
-              ❌
+                {baixo && (
+                  <div className={styles.aviso}>⚠️ Estoque baixo</div>
+                )}
 
-            </button>
-
-          </div>
-
-        ))}
-
+                <p><b>Categoria:</b> {item.produto?.categoria}</p>
+                <p><b>Quantidade:</b> {item.quantidade} {item.produto?.unidade}</p>
+                {item.estoque_minimo > 0 && (
+                  <p><b>Mínimo:</b> {item.estoque_minimo}</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
     </main>

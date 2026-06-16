@@ -1,166 +1,116 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/app/lib/supabase";
 import styles from "./page.module.css";
 
 export default function FuncionariosAdmin() {
 
   // ===== FUNCIONÁRIOS =====
-  const [funcionarios,
-  setFuncionarios] = useState([
-
-    {
-      id: 1,
-      nome: "Diandres",
-      funcao: "Atendente"
-    },
-
-    {
-      id: 2,
-      nome: "Leidi",
-      funcao: "Atendente"
-    },
-
-    {
-      id: 3,
-      nome: "Lenir",
-      funcao: "Atendente"
-    },
-
-    {
-      id: 4,
-      nome: "Andreina",
-      funcao: "Atendente"
-    },
-
-    {
-      id: 5,
-      nome: "Karla",
-      funcao: "Atendente"
-    }
-
-  ]);
+  const [funcionarios, setFuncionarios] = useState([]);
 
   // ===== STATES =====
-  const [nome, setNome] =
-    useState("");
+  const [nome, setNome] = useState("");
+  const [funcao, setFuncao] = useState("");
+  const [pesquisa, setPesquisa] = useState("");
 
-  const [funcao, setFuncao] =
-    useState("");
+  // ===== CARREGAR =====
+  useEffect(() => {
+    carregarFuncionarios();
+  }, []);
 
-  const [pesquisa, setPesquisa] =
-    useState("");
+  async function carregarFuncionarios() {
+    const { data, error } = await supabase
+      .from("funcionarios")
+      .select("*")
+      .order("id");
+
+    if (error) {
+      console.log("ERRO SUPABASE:", error);
+      return;
+    }
+
+    setFuncionarios(data);
+  }
 
   // ===== ADD =====
-  function adicionarFuncionario() {
-
+  async function adicionarFuncionario() {
     if (!nome || !funcao) return;
 
-    const novo = {
+    const { error } = await supabase
+      .from("funcionarios")
+      .insert([{ nome, funcao }]);
 
-      id: Date.now(),
+    if (error) {
+  console.error(error);
 
-      nome,
-      funcao
+  alert(
+    JSON.stringify(error, null, 2)
+  );
 
-    };
+  return;
+}
 
-    setFuncionarios([
-      ...funcionarios,
-      novo
-    ]);
-
+    carregarFuncionarios();
     setNome("");
     setFuncao("");
   }
 
   // ===== REMOVER =====
-  function removerFuncionario(id) {
+  async function removerFuncionario(id) {
+    const { error } = await supabase
+      .from("funcionarios")
+      .delete()
+      .eq("id", id);
 
-    const novaLista =
-      funcionarios.filter(
-        (funcionario) =>
-          funcionario.id !== id
-      );
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-    setFuncionarios(novaLista);
-
+    carregarFuncionarios();
   }
 
   // ===== ALTERAR =====
-  function alterarFuncionario(
-    id,
-    campo,
-    valor
-  ) {
+  async function alterarFuncionario(id, campo, valor) {
+    const { error } = await supabase
+      .from("funcionarios")
+      .update({ [campo]: valor })
+      .eq("id", id);
 
-    const atualizados =
-      funcionarios.map((funcionario) => {
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-        if (funcionario.id === id) {
-
-          return {
-            ...funcionario,
-            [campo]: valor
-          };
-
-        }
-
-        return funcionario;
-
-      });
-
-    setFuncionarios(atualizados);
-
+    carregarFuncionarios();
   }
 
   // ===== PESQUISA =====
-  const listaFiltrada =
-    funcionarios.filter(
-      (funcionario) =>
+  const listaFiltrada = funcionarios.filter((funcionario) =>
+    funcionario.nome?.toLowerCase().includes(pesquisa.toLowerCase())
+  );
 
-        funcionario.nome
-          .toLowerCase()
-          .includes(
-            pesquisa.toLowerCase()
-          )
-
-    );
-
+  // ===== RETURN ===== ✅ ESTAVA FALTANDO ISSO
   return (
-
-    <main className={styles.body}>
+    <div>
 
       {/* HEADER */}
       <div className={styles.header}>
-
-        <h1>
-          👥 Funcionários
-        </h1>
-
-        <p>
-          Cadastro e gerenciamento
-        </p>
-
+        <h1>👥 Funcionários</h1>
+        <p>Cadastro e gerenciamento</p>
       </div>
 
       {/* CADASTRO */}
       <div className={styles.card}>
-
-        <h2>
-          ➕ Cadastrar funcionário
-        </h2>
+        <h2>➕ Cadastrar funcionário</h2>
 
         <input
           className={styles.input}
           type="text"
           placeholder="Nome"
           value={nome}
-          onChange={(e) =>
-            setNome(
-              e.target.value
-            )
-          }
+          onChange={(e) => setNome(e.target.value)}
         />
 
         <input
@@ -168,129 +118,79 @@ export default function FuncionariosAdmin() {
           type="text"
           placeholder="Função"
           value={funcao}
-          onChange={(e) =>
-            setFuncao(
-              e.target.value
-            )
-          }
+          onChange={(e) => setFuncao(e.target.value)}
         />
 
         <button
           className={styles.button}
-          onClick={
-            adicionarFuncionario
-          }
+          onClick={adicionarFuncionario}
         >
           Cadastrar
         </button>
-
       </div>
 
       {/* PESQUISA */}
       <div className={styles.card}>
-
         <input
           className={styles.input}
           type="text"
           placeholder="🔍 Pesquisar funcionário"
           value={pesquisa}
-          onChange={(e) =>
-            setPesquisa(
-              e.target.value
-            )
-          }
+          onChange={(e) => setPesquisa(e.target.value)}
         />
-
       </div>
 
       {/* LISTA */}
       <div className={styles.lista}>
+        {listaFiltrada.map((funcionario) => (
+          <div key={funcionario.id} className={styles.item}>
 
-        {listaFiltrada.map(
-          (funcionario) => (
+            <div className={styles.info}>
 
-            <div
-              key={funcionario.id}
-              className={styles.item}
-            >
-
-              <div className={styles.info}>
-
-                {/* NOME */}
-                <div>
-
-                  <label>
-                    Nome
-                  </label>
-
-                  <input
-                    className={
-                      styles.inputEdit
-                    }
-                    type="text"
-                    value={
-                      funcionario.nome
-                    }
-                    onChange={(e) =>
-                      alterarFuncionario(
-                        funcionario.id,
-                        "nome",
-                        e.target.value
-                      )
-                    }
-                  />
-
-                </div>
-
-                {/* FUNÇÃO */}
-                <div>
-
-                  <label>
-                    Função
-                  </label>
-
-                  <input
-                    className={
-                      styles.inputEdit
-                    }
-                    type="text"
-                    value={
-                      funcionario.funcao
-                    }
-                    onChange={(e) =>
-                      alterarFuncionario(
-                        funcionario.id,
-                        "funcao",
-                        e.target.value
-                      )
-                    }
-                  />
-
-                </div>
-
+              {/* NOME */}
+              <div>
+                <label>Nome</label>
+                <input
+                  className={styles.inputEdit}
+                  type="text"
+                  value={funcionario.nome}
+                 onBlur={(e) =>
+  alterarFuncionario(
+    funcionario.id,
+    "nome",
+    e.target.value
+  )
+}
+                />
               </div>
 
-              {/* REMOVER */}
-              <button
-                className={
-                  styles.remover
-                }
-                onClick={() =>
-                  removerFuncionario(
-                    funcionario.id
-                  )
-                }
-              >
-                ❌
-              </button>
+              {/* FUNÇÃO */}
+              <div>
+                <label>Função</label>
+                <input
+                  className={styles.inputEdit}
+                  type="text"
+                  value={funcionario.funcao}
+                  onChange={(e) =>
+                    alterarFuncionario(funcionario.id, "funcao", e.target.value)
+                  }
+                />
+              </div>
 
             </div>
 
-          )
-        )}
+            {/* REMOVER */}
+            <button
+              className={styles.remover}
+              onClick={() => removerFuncionario(funcionario.id)}
+            >
+              ❌
+            </button>
 
+          </div>
+        ))}
       </div>
 
-    </main>
+    </div>
   );
 }

@@ -1,352 +1,192 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/app/lib/supabase";
 import styles from "./page.module.css";
 
 export default function FinanceiroAdmin() {
 
-  // ===== MOVIMENTAÇÕES =====
-  const [movimentacoes,
-  setMovimentacoes] = useState([
+  const [caixas, setCaixas] = useState([]);
+  const [pedidos, setPedidos] = useState([]);
+  const [filtroPeriodo, setFiltroPeriodo] = useState("hoje");
+  const [loading, setLoading] = useState(false);
 
-    {
-      id: 1,
-      descricao: "Compra de farinha",
-      valor: 450,
-      tipo: "saida",
-      responsavel: "Melvin",
-      data: "22/05/2026"
-    },
+  // FORM MOVIMENTAÇÃO
+  const [descricao, setDescricao] = useState("");
+  const [valor, setValor] = useState("");
+  const [tipo, setTipo] = useState("entrada");
+  const [responsavel, setResponsavel] = useState("");
+  const [pesquisa, setPesquisa] = useState("");
 
-    {
-      id: 2,
-      descricao: "Pagamento fornecedor",
-      valor: 1200,
-      tipo: "saida",
-      responsavel: "Brigadeiro",
-      data: "22/05/2026"
-    },
+  // Movimentações extras (sem tabela dedicada — use a de caixa ou mantém local por ora)
+  const [movimentacoes, setMovimentacoes] = useState(() => {
+    if (typeof window !== "undefined") {
+      return JSON.parse(localStorage.getItem("movimentacoesAdmin") || "[]");
+    }
+    return [];
+  });
 
-    {
-      id: 3,
-      descricao: "Venda do dia",
-      valor: 3500,
-      tipo: "entrada",
-      responsavel: "Caixa",
-      data: "22/05/2026"
+  useEffect(() => {
+    carregarDados();
+  }, [filtroPeriodo]);
+
+  async function carregarDados() {
+    setLoading(true);
+
+    let query = supabase.from("caixa").select("*").order("data", { ascending: false });
+    let queryPedidos = supabase
+      .from("pedidos_filiais")
+      .select("*, produto:produto(nome)")
+      .order("data", { ascending: false });
+
+    const hoje = new Date().toISOString().split("T")[0];
+    if (filtroPeriodo === "hoje") {
+      query = query.eq("data", hoje);
+      queryPedidos = queryPedidos.eq("data", hoje);
+    } else if (filtroPeriodo === "semana") {
+      const seteDias = new Date();
+      seteDias.setDate(seteDias.getDate() - 7);
+      query = query.gte("data", seteDias.toISOString().split("T")[0]);
+      queryPedidos = queryPedidos.gte("data", seteDias.toISOString().split("T")[0]);
     }
 
-  ]);
+    const { data: dataCaixas } = await query;
+    const { data: dataPedidos } = await queryPedidos;
 
-  // ===== STATES =====
-  const [descricao, setDescricao] =
-    useState("");
+    setCaixas(dataCaixas || []);
+    setPedidos(dataPedidos || []);
+    setLoading(false);
+  }
 
-  const [valor, setValor] =
-    useState("");
-
-  const [tipo, setTipo] =
-    useState("entrada");
-
-  const [responsavel,
-  setResponsavel] =
-    useState("");
-
-  const [pesquisa,
-  setPesquisa] =
-    useState("");
-
-  // ===== ADICIONAR =====
   function adicionarMovimentacao() {
-
-    if (
-      !descricao ||
-      !valor ||
-      !responsavel
-    ) return;
-
+    if (!descricao || !valor || !responsavel) return;
     const nova = {
-
       id: Date.now(),
-
       descricao,
-
-      valor:
-        Number(valor),
-
+      valor: Number(valor),
       tipo,
-
       responsavel,
-
-      data:
-        new Date()
-        .toLocaleDateString()
-
+      data: new Date().toLocaleDateString(),
     };
-
-    setMovimentacoes([
-      nova,
-      ...movimentacoes
-    ]);
-
-    setDescricao("");
-    setValor("");
-    setResponsavel("");
-  }
-
-  // ===== REMOVER =====
-  function remover(id) {
-
-    const novaLista =
-      movimentacoes.filter(
-        (item) =>
-          item.id !== id
-      );
-
+    const novaLista = [nova, ...movimentacoes];
     setMovimentacoes(novaLista);
-
+    localStorage.setItem("movimentacoesAdmin", JSON.stringify(novaLista));
+    setDescricao(""); setValor(""); setResponsavel("");
   }
 
-  // ===== FILTRO =====
-  const listaFiltrada =
-    movimentacoes.filter((item) =>
+  function remover(id) {
+    const novaLista = movimentacoes.filter((m) => m.id !== id);
+    setMovimentacoes(novaLista);
+    localStorage.setItem("movimentacoesAdmin", JSON.stringify(novaLista));
+  }
 
-      item.descricao
-        .toLowerCase()
-        .includes(
-          pesquisa.toLowerCase()
-        )
+  const listaFiltrada = movimentacoes.filter((m) =>
+    m.descricao.toLowerCase().includes(pesquisa.toLowerCase())
+  );
 
-    );
+  const entradas = movimentacoes.filter((m) => m.tipo === "entrada").reduce((a, m) => a + m.valor, 0);
+  const saidas = movimentacoes.filter((m) => m.tipo === "saida").reduce((a, m) => a + m.valor, 0);
+  const saldo = entradas - saidas;
 
-  // ===== TOTAIS =====
-  const entradas =
-    movimentacoes
-      .filter(
-        (item) =>
-          item.tipo === "entrada"
-      )
-      .reduce(
-        (acc, item) =>
-          acc + item.valor,
-        0
-      );
-
-  const saidas =
-    movimentacoes
-      .filter(
-        (item) =>
-          item.tipo === "saida"
-      )
-      .reduce(
-        (acc, item) =>
-          acc + item.valor,
-        0
-      );
-
-  const saldo =
-    entradas - saidas;
+  const totalCaixas = caixas.reduce((acc, cx) => acc + Number(cx.dinheiro||0) + Number(cx.pix||0) + Number(cx.debito||0) + Number(cx.credito||0) + Number(cx.alimentacao||0) + Number(cx.delivery||0), 0);
 
   return (
-
     <main className={styles.body}>
 
-      {/* HEADER */}
       <div className={styles.header}>
-
-        <h1>
-          💰 Financeiro
-        </h1>
-
-        <p>
-          Controle das contas
-        </p>
-
+        <h1>💰 Financeiro</h1>
+        <p>Controle das contas</p>
       </div>
 
-      {/* CARDS */}
+      {/* FILTRO */}
+      <div className={styles.card}>
+        <select className={styles.input} value={filtroPeriodo} onChange={(e) => setFiltroPeriodo(e.target.value)}>
+          <option value="hoje">Hoje</option>
+          <option value="semana">Últimos 7 dias</option>
+          <option value="tudo">Tudo</option>
+        </select>
+      </div>
+
+      {/* RESUMO CAIXA DO BANCO */}
       <div className={styles.cards}>
-
         <div className={styles.cardResumo}>
-          <h3>
-            💵 Entradas
-          </h3>
-
-          <p>
-            R$ {entradas}
-          </p>
+          <h3>🏦 Caixas</h3>
+          <p>R$ {totalCaixas.toFixed(2)}</p>
+          <small>{caixas.length} fechamentos</small>
         </div>
-
         <div className={styles.cardResumo}>
-          <h3>
-            💸 Saídas
-          </h3>
-
-          <p>
-            R$ {saidas}
-          </p>
+          <h3>📦 Pedidos</h3>
+          <p>{pedidos.length} registros</p>
         </div>
-
         <div className={styles.cardResumo}>
-          <h3>
-            🏦 Saldo
-          </h3>
-
-          <p>
-            R$ {saldo}
-          </p>
+          <h3>🏦 Saldo</h3>
+          <p style={{ color: saldo >= 0 ? "#2e7d32" : "#c62828" }}>R$ {saldo.toFixed(2)}</p>
         </div>
+      </div>
 
+      {loading && <div className={styles.card}><p>Carregando...</p></div>}
+
+      {/* CAIXAS DO BANCO */}
+      {caixas.length > 0 && (
+        <div className={styles.card}>
+          <h2>💵 Fechamentos de Caixa</h2>
+          {caixas.map((cx) => {
+            const tot = Number(cx.dinheiro||0) + Number(cx.pix||0) + Number(cx.debito||0) + Number(cx.credito||0) + Number(cx.alimentacao||0) + Number(cx.delivery||0);
+            return (
+              <div key={cx.id} style={{ borderLeft: "4px solid #1565c0", padding: "12px", margin: "8px 0", background: "#f5f5f5", borderRadius: "10px" }}>
+                <strong>📅 {cx.data}</strong>
+                <p>Dinheiro: R${Number(cx.dinheiro||0).toFixed(2)} | Pix: R${Number(cx.pix||0).toFixed(2)} | Débito: R${Number(cx.debito||0).toFixed(2)} | Crédito: R${Number(cx.credito||0).toFixed(2)}</p>
+                <p><strong>Total: R$ {tot.toFixed(2)}</strong></p>
+                {cx.observacao && <p>📝 {cx.observacao}</p>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* RESUMO MOVIMENTACOES EXTRAS */}
+      <div className={styles.cards}>
+        <div className={styles.cardResumo}><h3>💵 Entradas</h3><p>R$ {entradas.toFixed(2)}</p></div>
+        <div className={styles.cardResumo}><h3>💸 Saídas</h3><p>R$ {saidas.toFixed(2)}</p></div>
       </div>
 
       {/* FORM */}
       <div className={styles.card}>
+        <h2>➕ Nova movimentação</h2>
 
-        <h2>
-          ➕ Nova movimentação
-        </h2>
+        <input className={styles.input} type="text" placeholder="Descrição" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+        <input className={styles.input} type="number" placeholder="Valor" value={valor} onChange={(e) => setValor(e.target.value)} />
 
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Descrição"
-          value={descricao}
-          onChange={(e) =>
-            setDescricao(
-              e.target.value
-            )
-          }
-        />
-
-        <input
-          className={styles.input}
-          type="number"
-          placeholder="Valor"
-          value={valor}
-          onChange={(e) =>
-            setValor(
-              e.target.value
-            )
-          }
-        />
-
-        <select
-          className={styles.input}
-          value={tipo}
-          onChange={(e) =>
-            setTipo(
-              e.target.value
-            )
-          }
-        >
-
-          <option value="entrada">
-            Entrada
-          </option>
-
-          <option value="saida">
-            Saída
-          </option>
-
+        <select className={styles.input} value={tipo} onChange={(e) => setTipo(e.target.value)}>
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída</option>
         </select>
 
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Responsável"
-          value={responsavel}
-          onChange={(e) =>
-            setResponsavel(
-              e.target.value
-            )
-          }
-        />
+        <input className={styles.input} type="text" placeholder="Responsável" value={responsavel} onChange={(e) => setResponsavel(e.target.value)} />
 
-        <button
-          className={styles.button}
-          onClick={
-            adicionarMovimentacao
-          }
-        >
-          Salvar movimentação
-        </button>
-
+        <button className={styles.button} onClick={adicionarMovimentacao}>Salvar movimentação</button>
       </div>
 
-      {/* PESQUISA */}
       <div className={styles.card}>
-
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="🔍 Pesquisar"
-          value={pesquisa}
-          onChange={(e) =>
-            setPesquisa(
-              e.target.value
-            )
-          }
-        />
-
+        <input className={styles.input} type="text" placeholder="🔍 Pesquisar" value={pesquisa} onChange={(e) => setPesquisa(e.target.value)} />
       </div>
 
-      {/* LISTA */}
       <div className={styles.lista}>
-
         {listaFiltrada.map((item) => (
-
-          <div
-            key={item.id}
-            className={styles.item}
-          >
-
+          <div key={item.id} className={styles.item}>
             <div>
-
-              <h3>
-                {item.descricao}
-              </h3>
-
-              <p>
-                👤 {item.responsavel}
-              </p>
-
-              <p>
-                📅 {item.data}
-              </p>
-
+              <h3>{item.descricao}</h3>
+              <p>👤 {item.responsavel}</p>
+              <p>📅 {item.data}</p>
             </div>
-
             <div className={styles.ladoDireito}>
-
-              <span
-                className={
-                  item.tipo === "entrada"
-                    ? styles.entrada
-                    : styles.saida
-                }
-              >
-
-                R$ {item.valor}
-
+              <span className={item.tipo === "entrada" ? styles.entrada : styles.saida}>
+                R$ {item.valor.toFixed(2)}
               </span>
-
-              <button
-                className={
-                  styles.remover
-                }
-                onClick={() =>
-                  remover(item.id)
-                }
-              >
-                ❌
-              </button>
-
+              <button className={styles.remover} onClick={() => remover(item.id)}>❌</button>
             </div>
-
           </div>
-
         ))}
-
       </div>
 
     </main>
