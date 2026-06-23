@@ -23,10 +23,10 @@ export default function Estoque() {
     setLoading(true);
 
     const { data: dataProdutos } = await supabase
-      .from("produto")
-      .select("*")
-      .order("nome");
-
+  .from("produto")
+  .select("*")
+  .eq("categoria", "Mercearia")
+  .order("nome");
     const { data: dataEstoque } = await supabase
       .from("estoque")
       .select("*, produto:produto_id(id, nome, categoria, unidade)")

@@ -87,7 +87,7 @@ export default function Home() {
           <div className={styles.icone}>👨‍🍳</div>
           <h2>Produção</h2>
           <p>Escala e Pedidos</p>
-          <Link href="/producaoAdmin">
+          <Link href="/admin/producaoAdmin">
             <button>Acessar</button>
           </Link>
         </div>

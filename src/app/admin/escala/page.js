@@ -9,37 +9,39 @@ export default function EscalaAdmin() {
   const [funcionarios, setFuncionarios] = useState([]);
   const [escalas, setEscalas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const hoje = new Date();
+  const ehSabado = hoje.getDay() === 6;
 
   // FORM
   const [funcionarioId, setFuncionarioId] = useState("");
-  const [data, setData] = useState(new Date().toISOString().split("T")[0]);
   const [setor, setSetor] = useState("");
   const [tarefa, setTarefa] = useState("");
   const [status, setStatus] = useState("Pendente");
 
   // FILTRO DE DATA
-  const [filtroData, setFiltroData] = useState(new Date().toISOString().split("T")[0]);
 
-  useEffect(() => {
-    carregarDados();
-  }, [filtroData]);
+ useEffect(() => {
+  carregarDados();
+}, []);
 
   async function carregarDados() {
-    setLoading(true);
+  setLoading(true);
 
-    const { data: dataFuncs } = await supabase
-      .from("funcionarios").select("*").order("nome");
+  const { data: dataFuncs } = await supabase
+    .from("funcionarios")
+    .select("*")
+    .order("nome");
 
-    const { data: dataEscalas } = await supabase
-      .from("escala")
-      .select("*, funcionario:funcionario_id(id, nome)")
-      .eq("data", filtroData)
-      .order("id");
+  const { data: dataEscalas } = await supabase
+    .from("escala")
+    .select("*, funcionario:funcionario_id(id,nome)")
+    .order("id");
 
-    setFuncionarios(dataFuncs || []);
-    setEscalas(dataEscalas || []);
-    setLoading(false);
-  }
+  setFuncionarios(dataFuncs || []);
+  setEscalas(dataEscalas || []);
+
+  setLoading(false);
+}
 
   async function adicionarEscala() {
     if (!funcionarioId || !tarefa) {
@@ -49,7 +51,6 @@ export default function EscalaAdmin() {
 
     const { error } = await supabase.from("escala").insert([{
       funcionario_id: Number(funcionarioId),
-      data,
       setor,
       tarefa,
       status,
@@ -95,7 +96,6 @@ export default function EscalaAdmin() {
           {funcionarios.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
         </select>
 
-        <input className={styles.input} type="date" value={data} onChange={(e) => setData(e.target.value)} />
         <input className={styles.input} type="text" placeholder="Setor (opcional)" value={setor} onChange={(e) => setSetor(e.target.value)} />
         <input className={styles.input} type="text" placeholder="Tarefa" value={tarefa} onChange={(e) => setTarefa(e.target.value)} />
 
@@ -107,17 +107,18 @@ export default function EscalaAdmin() {
 
         <button className={styles.button} onClick={adicionarEscala}>Adicionar tarefa</button>
       </div>
+      {ehSabado && (
+        <div className={styles.avisoLimpeza}>
+          🧹 Hoje é sábado! Há tarefas de limpeza pendentes.
 
-      {/* FILTRO DATA */}
-      <div className={styles.card}>
-        <label style={{ fontWeight: "bold", display: "block", marginBottom: "8px" }}>📅 Ver escalas do dia:</label>
-        <input
-          className={styles.input}
-          type="date"
-          value={filtroData}
-          onChange={(e) => setFiltroData(e.target.value)}
-        />
-      </div>
+          <button
+            className={styles.botaoLimpeza}
+            onClick={() => window.location.href = "/limpeza"}
+          >
+            Ir para limpeza
+          </button>
+        </div>
+      )}
 
       {loading && <div className={styles.card}><p>Carregando...</p></div>}
 
@@ -166,7 +167,7 @@ export default function EscalaAdmin() {
 
       {escalas.length === 0 && !loading && (
         <div className={styles.card}>
-          <p>Nenhuma escala para {filtroData}.</p>
+          <p>Nenhuma tarefa cadastrada.</p>
         </div>
       )}
 

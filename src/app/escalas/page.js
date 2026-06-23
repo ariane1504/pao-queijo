@@ -13,7 +13,6 @@ export default function Escalas() {
   const [loading, setLoading] = useState(false);
   const [todasEscalas, setTodasEscalas] = useState([]);
 
-  const hoje = new Date().toISOString().split("T")[0];
 
   // ===== CARREGAR SESSÃO =====
   useEffect(() => {
@@ -36,14 +35,12 @@ export default function Escalas() {
   async function carregarEscalas() {
     setLoading(true);
     const isAdmin = tipoUsuario === "admin" || usuarioLogado === "admin";
-
     if (isAdmin) {
-      // Admin vê tudo do dia
       const { data } = await supabase
         .from("escala")
         .select("*, funcionario:funcionario_id(id, nome)")
-        .eq("data", hoje)
         .order("id");
+
       setTodasEscalas(data || []);
     } else {
       // Busca o funcionario_id pelo nome
@@ -59,7 +56,6 @@ export default function Escalas() {
           .from("escala")
           .select("*")
           .eq("funcionario_id", funcId)
-          .eq("data", hoje)
           .order("id");
         setEscalas(data || []);
       }
@@ -72,6 +68,8 @@ export default function Escalas() {
     localStorage.removeItem("usuarioLogado");
     setUsuarioLogado(false);
     setEscalas([]);
+
+      window.location.href = "/home";
   }
 
   async function alterarStatus(id, novoStatus) {
@@ -123,9 +121,8 @@ export default function Escalas() {
         {isAdmin ? (
           /* PAINEL ADMIN */
           <div className={styles.card}>
-            <h3>📊 Painel Geral — {hoje}</h3>
-            {todasEscalas.length === 0 && <p>Sem escalas cadastradas para hoje.</p>}
-            {Object.entries(porFuncionario).map(([nome, tarefas]) => {
+            <h3>📊 Painel Geral </h3>
+            {todasEscalas.length === 0 && <p>Nenhuma tarefa cadastrada.</p>}            {Object.entries(porFuncionario).map(([nome, tarefas]) => {
               const tot = tarefas.length;
               const feit = tarefas.filter((t) => t.status === "Concluído").length;
               const pct = tot > 0 ? Math.round((feit / tot) * 100) : 0;
@@ -149,9 +146,11 @@ export default function Escalas() {
           <>
             {/* TAREFAS DO USUÁRIO */}
             <div className={styles.card}>
-              <h3>📋 Suas tarefas — {hoje}</h3>
+              <h3>📋 Suas tarefas
 
-              {escalas.length === 0 && <p>Nenhuma tarefa para hoje.</p>}
+              </h3>
+
+              {escalas.length === 0 && <p>Nenhuma tarefa cadastrada.</p>}
 
               {escalas.map((e) => (
                 <div key={e.id} className={styles.item}>

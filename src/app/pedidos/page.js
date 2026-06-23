@@ -54,7 +54,7 @@ export default function Pedidos() {
 
   // ===== FAZER PEDIDO =====
   async function adicionarPedido() {
-    if (produtoEnvioId === "" || quantidadeEnvio === "") {
+    if (produtoPedidoId === "" || quantidadePedido === "") {
       alert("Preencha os campos!");
       return;
     }
@@ -190,21 +190,15 @@ export default function Pedidos() {
         <input className={styles.input} type="number" placeholder="Quantidade" value={quantidadeEnvio} onChange={(e) => setQuantidadeEnvio(e.target.value)} />
         <input className={styles.input} type="number" placeholder="Valor (opcional)" value={valor} onChange={(e) => setValor(e.target.value)} />
 
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Quem enviou"
-          value={enviadoPor}
-          onChange={(e) => setEnviadoPor(e.target.value)}
-        />
+        <select className={styles.input} value={enviadoPor} onChange={(e) => setEnviadoPor(e.target.value)}>
+          <option value="">Quem enviou (opcional)</option>
+          {funcionarios.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
+        </select>
 
-        <input
-          className={styles.input}
-          type="text"
-          placeholder="Quem recebeu"
-          value={recebidoPor}
-          onChange={(e) => setRecebidoPor(e.target.value)}
-        />
+        <select className={styles.input} value={recebidoPor} onChange={(e) => setRecebidoPor(e.target.value)}>
+          <option value="">Quem recebeu (opcional)</option>
+          {funcionarios.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
+        </select>
 
         <textarea className={styles.textarea} placeholder="Observação" value={observacaoEnvio} onChange={(e) => setObservacaoEnvio(e.target.value)} />
 

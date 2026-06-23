@@ -3,144 +3,80 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
+import { supabase } from "./lib/supabase";
 
 export default function Login() {
-
-  // ===== USUÁRIOS =====
-  const usuarios = {
-
-    admin: {
-      senha: "123",
-      funcao: "admin",
-      nome: "Administrador"
-    },
-
-    diandres: {
-      senha: "123",
-      funcao: "atendente",
-      nome: "Diandres"
-    },
-
-    leidi: {
-      senha: "123",
-      funcao: "atendente",
-      nome: "Leidi"
-    },
-
-    lenir: {
-      senha: "123",
-      funcao: "atendente",
-      nome: "Lenir"
-    },
-
-    karla: {
-      senha: "123",
-      funcao: "padeiro",
-      nome: "Carlos"
-    }
-
-  };
-
-  // ===== STATES =====
-  const [usuario, setUsuario] =
-    useState("");
-
-  const [senha, setSenha] =
-    useState("");
-
-  const [dadosUsuario,
-    setDadosUsuario] =
-    useState(null);
+  const [usuario, setUsuario] = useState("");
+  const [senha, setSenha] = useState("");
+  const [dadosUsuario, setDadosUsuario] = useState(null);
 
   useEffect(() => {
-  const usuarioSalvo =
-    localStorage.getItem("usuarioLogado");
+    const usuarioSalvo = localStorage.getItem("usuarioLogado");
 
-  if (usuarioSalvo) {
-    setDadosUsuario(
-      JSON.parse(usuarioSalvo)
-    );
-  }
-}, []);
+    if (usuarioSalvo) {
+      setDadosUsuario(JSON.parse(usuarioSalvo));
+    }
+  }, []);
 
-  // ===== LOGIN =====
-  function entrar() {
+  async function entrar() {
+    const user = usuario.trim().toLowerCase();
 
-    const user =
-      usuario
-        .trim()
-        .toLowerCase();
-
-    if (
-      usuarios[user] &&
-      usuarios[user].senha === senha
-    ) {
-
-      const dados =
-        usuarios[user];
-
-      const usuarioLogado = {
-  usuario: user,
-  ...dados
-};
-
-localStorage.setItem(
-  "usuarioLogado",
-  JSON.stringify(usuarioLogado)
-);
-
-setDadosUsuario(usuarioLogado);;
-
-    } else {
-
-      alert(
-        "Usuário ou senha inválidos"
-      );
-
+    if (!user || !senha) {
+      alert("Preencha usuário e senha");
+      return;
     }
 
+    const { data, error } = await supabase
+      .from("usuario")
+      .select(`
+        usuario,
+        funcionario_id,
+        funcionarios (
+          id,
+          nome,
+          funcao
+        )
+      `)
+      .eq("usuario", user)
+      .eq("senha", Number(senha))
+      .single();
+
+    if (error || !data) {
+      alert("Usuário ou senha inválidos");
+      return;
+    }
+
+    const usuarioLogado = {
+      id: data.funcionarios.id,
+      usuario: data.usuario,
+      nome: data.funcionarios.nome,
+      funcao: data.funcionarios.funcao.toLowerCase(),
+    };
+
+    localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
+    setDadosUsuario(usuarioLogado);
   }
 
-  // ===== LOGOUT =====
   function sair() {
+    localStorage.removeItem("usuarioLogado");
+    setUsuario("");
+    setSenha("");
+    setDadosUsuario(null);
+  }
 
-  localStorage.removeItem(
-    "usuarioLogado"
-  );
-
-  setUsuario("");
-  setSenha("");
-  setDadosUsuario(null);
-
-}
-
-  // ===== LOGIN =====
   if (!dadosUsuario) {
-
     return (
-
       <main className={styles.body}>
-
         <div className={styles.loginCard}>
-
-          <h1>
-            🥖 Padaria
-          </h1>
-
-          <p>
-            Sistema interno
-          </p>
+          <h1>🥖 Padaria</h1>
+          <p>Sistema interno</p>
 
           <input
             className={styles.input}
             type="text"
             placeholder="Usuário"
             value={usuario}
-            onChange={(e) =>
-              setUsuario(
-                e.target.value
-              )
-            }
+            onChange={(e) => setUsuario(e.target.value)}
           />
 
           <input
@@ -148,232 +84,82 @@ setDadosUsuario(usuarioLogado);;
             type="password"
             placeholder="Senha"
             value={senha}
-            onChange={(e) =>
-              setSenha(
-                e.target.value
-              )
-            }
+            onChange={(e) => setSenha(e.target.value)}
           />
 
-          <button
-            className={styles.button}
-            onClick={entrar}
-          >
-
+          <button className={styles.button} onClick={entrar}>
             Entrar
-
           </button>
-
         </div>
-
       </main>
-
     );
-
   }
 
-  // ===== HOME =====
   return (
-
     <main className={styles.body}>
-
-      {/* HEADER */}
       <div className={styles.header}>
-
         <div>
-
-          <h1>
-            👋 {dadosUsuario.nome}
-          </h1>
-
-          <p>
-            Função:
-            {" "}
-            {dadosUsuario.funcao}
-          </p>
-
+          <h1>👋 {dadosUsuario.nome}</h1>
+          <p>Função: {dadosUsuario.funcao}</p>
         </div>
 
-        <button
-          className={styles.sair}
-          onClick={sair}
-        >
-
+        <button className={styles.sair} onClick={sair}>
           Sair
-
         </button>
-
       </div>
 
-      {/* MENU */}
       <div className={styles.grid}>
-
-        <Link
-          href="/pedidos"
-          className={styles.card}
-        >
-
-          <h2>
-            📦 Fazer Pedido
-          </h2>
-
-          <p>
-            Pedidos para produção
-          </p>
-
+        <Link href="/pedidos" className={styles.card}>
+          <h2>📦 Fazer Pedido</h2>
+          <p>Pedidos para produção</p>
         </Link>
 
-        {/* ESCALA */}
-        <Link
-          href="/escalas"
-          className={styles.card}
-        >
-
-          <h2>
-            📋 Escala
-          </h2>
-
-          <p>
-            Tarefas da equipe
-          </p>
-
+        <Link href="/escalas" className={styles.card}>
+          <h2>📋 Escala</h2>
+          <p>Tarefas da equipe</p>
         </Link>
 
-        {/* ESTOQUE */}
-        <Link
-          href="/estoque"
-          className={styles.card}
-        >
-
-          <h2>
-            📦 Estoque
-          </h2>
-
-          <p>
-            Produtos da padaria
-          </p>
-
+        <Link href="/estoque" className={styles.card}>
+          <h2>📦 Estoque</h2>
+          <p>Produtos da padaria</p>
         </Link>
 
-        {/* LIMPEZA */}
-        <Link
-          href="/limpeza"
-          className={styles.card}
-        >
-
-          <h2>
-            🧼 Limpeza
-          </h2>
-
-          <p>
-            Controle de limpeza
-          </p>
-
+        <Link href="/limpeza" className={styles.card}>
+          <h2>🧼 Limpeza</h2>
+          <p>Controle de limpeza</p>
         </Link>
 
-        {/* PRODUÇÃO */}
-        {
-          dadosUsuario.funcao !==
-          "atendente" && (
+        {dadosUsuario.funcao !== "atendente" && (
+          <Link href="/producao" className={styles.card}>
+            <h2>🥖 Produção</h2>
+            <p>Produção semanal</p>
+          </Link>
+        )}
 
-            <Link
-              href="/producao"
-              className={styles.card}
-            >
+        {dadosUsuario.funcao !== "padeiro" && (
+          <Link href="/caixa" className={styles.card}>
+            <h2>💰 Caixa</h2>
+            <p>Controle financeiro</p>
+          </Link>
+        )}
 
-              <h2>
-                🥖 Produção
-              </h2>
-
-              <p>
-                Produção semanal
-              </p>
-
-            </Link>
-
-          )
-        }
-
-        {/* CAIXA */}
-        {
-          dadosUsuario.funcao !==
-          "padeiro" && (
-
-            <Link
-              href="/caixa"
-              className={styles.card}
-            >
-
-              <h2>
-                💰 Caixa
-              </h2>
-
-              <p>
-                Controle financeiro
-              </p>
-
-            </Link>
-
-          )
-        }
-
-        {/* PEDIDOS */}
-        <Link
-          href="/encomenda"
-          className={styles.card}
-        >
-
-          <h2>
-            📦 Encomendas
-          </h2>
-
-          <p>
-            Encomendas clientes
-          </p>
-
+        <Link href="/encomenda" className={styles.card}>
+          <h2>📦 Encomendas</h2>
+          <p>Encomendas clientes</p>
         </Link>
 
-        <Link
-          href="/pedidos"
-          className={styles.card}
-        >
-
-          <h2>
-            📦 pedidos
-          </h2>
-
-          <p>
-            Pedidos filiais para Matriz
-          </p>
-
+        <Link href="/pedidos" className={styles.card}>
+          <h2>📦 pedidos</h2>
+          <p>Pedidos filiais para Matriz</p>
         </Link>
 
-        {/* ADMIN */}
-        {
-          dadosUsuario.funcao ===
-          "admin" && (
-
-            <Link
-              href="/admin"
-              className={styles.cardAdmin}
-            >
-
-              <h2>
-                👑 Admin
-              </h2>
-
-              <p>
-                Painel administrativo
-              </p>
-
-            </Link>
-
-          )
-        }
-
+        {dadosUsuario.funcao === "admin" && (
+          <Link href="/admin" className={styles.cardAdmin}>
+            <h2>👑 Admin</h2>
+            <p>Painel administrativo</p>
+          </Link>
+        )}
       </div>
-
     </main>
-
   );
 }

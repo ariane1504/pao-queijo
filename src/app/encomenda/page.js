@@ -54,7 +54,7 @@ export default function Encomendas() {
 
     const { error } = await supabase.from("encomenda").insert([{
       cliente,
-      telefone: telefone ? Number(telefone) : null,
+      telefone: telefone ? Number(telefone.replace(/\D/g, "")) || null : null,
       produto_id: Number(produtoId),
       quantidade: Number(quantidade),
       valor: valor ? Number(valor) : null,
