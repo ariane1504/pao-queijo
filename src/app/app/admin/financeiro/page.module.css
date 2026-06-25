@@ -1,0 +1,243 @@
+.body {
+  min-height: 100vh;
+  background: #f4f6f9;
+}
+
+/* HEADER */
+
+.header {
+
+  background: linear-gradient(
+    135deg,
+    #2e7d32,
+    #66bb6a
+  );
+
+  color: white;
+
+  padding: 25px;
+
+  border-radius: 22px;
+
+  margin-bottom: 25px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+/* RESUMOS */
+
+.cards {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(220px, 1fr));
+
+  gap: 20px;
+
+  margin-bottom: 20px;
+
+}
+
+.cardResumo {
+
+  background: white;
+
+  padding: 22px;
+
+  border-radius: 22px;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+.cardResumo h3 {
+  margin-top: 0;
+}
+
+.cardResumo p {
+
+  font-size: 28px;
+  font-weight: bold;
+
+}
+
+/* CARD */
+
+.card {
+
+  background: white;
+
+  padding: 22px;
+
+  border-radius: 22px;
+
+  margin-bottom: 20px;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+/* INPUT */
+
+.input {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border-radius: 14px;
+
+  border: 1px solid #ccc;
+
+  margin-top: 12px;
+
+  font-size: 15px;
+
+}
+
+/* BUTTON */
+
+.button {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: #2e7d32;
+
+  color: white;
+
+  margin-top: 14px;
+
+  cursor: pointer;
+
+  font-weight: bold;
+
+}
+
+.button:hover {
+  background: #1b5e20;
+}
+
+/* LISTA */
+
+.lista {
+
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+}
+
+/* ITEM */
+
+.item {
+
+  background: white;
+
+  padding: 20px;
+
+  border-radius: 20px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+.item h3 {
+  margin: 0;
+}
+
+/* LADO */
+
+.ladoDireito {
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+}
+
+/* VALORES */
+
+.entrada {
+
+  background: #43a047;
+
+  color: white;
+
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  font-weight: bold;
+
+}
+
+.saida {
+
+  background: #e53935;
+
+  color: white;
+
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  font-weight: bold;
+
+}
+
+/* REMOVER */
+
+.remover {
+
+  border: none;
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: 12px;
+
+  background: #ef5350;
+
+  color: white;
+
+  cursor: pointer;
+
+}
+
+.remover:hover {
+  background: #c62828;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .item {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 15px;
+
+  }
+
+}

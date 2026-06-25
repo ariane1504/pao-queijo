@@ -152,107 +152,29 @@
 
   color: white;
 
-  padding: 22px;
-  border-radius: 24px;
+  padding: 25px;
+  border-radius: 22px;
 
   margin-bottom: 25px;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
 
   box-shadow:
     0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.brandArea {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.brandIcon {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: #fffdf8;
-  color: var(--marrom);
-  display: grid;
-  place-items: center;
-  font-weight: 900;
-  font-size: 22px;
-  box-shadow: inset 0 -6px 0 rgba(242, 106, 33, 0.18);
-  flex: 0 0 auto;
-}
-
-.kicker {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
 .header h1 {
-  margin: 8px 0 0;
-  font-size: 30px;
-  line-height: 1.1;
+  margin: 0;
+  font-size: 28px;
 }
 
 .header p {
-  margin: 7px 0 0;
+  margin-top: 5px;
   opacity: 0.9;
 }
 
-.headerActions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.userBadge {
-  min-height: 54px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(8px);
-}
-
-.avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--laranja);
-  color: white;
-  display: grid;
-  place-items: center;
-  font-weight: 900;
-}
-
-.userBadge strong {
-  display: block;
-  text-transform: capitalize;
-}
-
-.userBadge small {
-  display: block;
-  margin-top: 2px;
-  opacity: 0.86;
-  text-transform: capitalize;
-  white-space: nowrap;
-}
-
-.adminShortcut,
 .sair {
   background: rgba(255, 255, 255, 0.2);
 
@@ -267,21 +189,14 @@
   cursor: pointer;
 
   font-weight: bold;
-  text-decoration: none;
 
   backdrop-filter: blur(8px);
 
   transition: 0.2s;
 }
 
-.adminShortcut {
-  background: var(--marrom);
-}
-
-.adminShortcut:hover,
 .sair:hover {
   background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
 }
 
 /* ======================
@@ -386,37 +301,6 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
-  }
-
-  .brandArea {
-    align-items: flex-start;
-  }
-
-  .brandIcon {
-    width: 54px;
-    height: 54px;
-    border-radius: 16px;
-    font-size: 18px;
-  }
-
-  .header h1 {
-    font-size: 25px;
-  }
-
-  .headerActions,
-  .userBadge,
-  .adminShortcut,
-  .sair {
-    width: 100%;
-  }
-
-  .headerActions {
-    align-items: stretch;
-  }
-
-  .adminShortcut,
-  .sair {
-    text-align: center;
   }
 
   .loginCard {

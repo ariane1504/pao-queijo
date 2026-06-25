@@ -1,0 +1,128 @@
+.body {
+  background: #f3f5f7;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* HEADER */
+
+.header {
+  background: linear-gradient(135deg, #5e35b1, #7e57c2);
+
+  color: white;
+  padding: 25px;
+  border-radius: 22px;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+/* CARD */
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* INPUTS */
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  padding: 14px;
+
+  border-radius: 12px;
+  border: 1px solid #ccc;
+
+  margin-top: 12px;
+
+  font-size: 15px;
+}
+
+.textarea {
+  resize: none;
+  min-height: 90px;
+}
+
+/* BUTTON */
+
+.button {
+  width: 100%;
+  padding: 14px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #43a047;
+  color: white;
+
+  font-weight: bold;
+  font-size: 15px;
+
+  margin-top: 15px;
+
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #388e3c;
+}
+
+/* LISTAS */
+
+.topoLista {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 15px;
+}
+
+/* PEDIDO */
+
+.pedido {
+  background: #fafafa;
+
+  border-radius: 16px;
+
+  padding: 16px;
+  margin-bottom: 15px;
+
+  border-left: 6px solid #7e57c2;
+}
+
+.pedido h3 {
+  margin-top: 0;
+}
+
+.status {
+  display: inline-block;
+
+  margin-top: 10px;
+
+  background: #fff3cd;
+  color: #856404;
+
+  padding: 6px 10px;
+  border-radius: 10px;
+
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 700px) {
+
+  .body {
+    padding: 15px;
+  }
+
+}

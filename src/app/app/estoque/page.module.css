@@ -1,20 +1,6 @@
-:root{
-  --fundo: #F7F4EC;
 
-  --verde-principal: #A5B96A;
-  --verde-card: #FDFBF7;
-  --verde-detalhe: #6E8B55;
-
-  --marrom: #5A3214;
-
-  --laranja: #E97825;
-  --laranja-hover: #D56413;
-
-  --cinza: #666;
-  --branco: #FFFFFF;
-}
 .body {
-  background: var(--fundo);
+  background: #f4f6f9;
   min-height: 100vh;
   padding: 20px;
 }
@@ -22,9 +8,13 @@
 /* HEADER */
 
 .header {
-  background: var(--marrom);
+  background: linear-gradient(
+    135deg,
+    #ff9800,
+    #f57c00
+  );
 
-  color: rgb(240, 237, 237);
+  color: white;
 
   padding: 25px;
   border-radius: 22px;
@@ -39,7 +29,7 @@
 /* CARD */
 
 .card {
-  background: var(--verde-principal);
+  background: white;
 
   padding: 20px;
   border-radius: 20px;
@@ -90,7 +80,7 @@
 /* RESUMO */
 
 .resumo {
-  background: var(--verde-detalhe);
+  background: white;
 
   padding: 18px;
   border-radius: 18px;

@@ -1,23 +1,5 @@
-:root{
-  --fundo: #F7F4EC;
-
-  --verde-principal: #A5B96A;
-  --verde-card: #FDFBF7;
-  --verde-detalhe: #6E8B55;
-
-  --marrom: #5A3214;
-
-  --laranja: #E97825;
-  --laranja-hover: #D56413;
-
-  --cinza: #666;
-  --branco: #FFFFFF;
-  --texto: #2B2B2B;
-}
-
-
 .body {
-  background: var(--fundo);
+  background: #eef2f7;
   min-height: 100vh;
   padding: 15px;
 }
@@ -28,7 +10,7 @@
 }
 
 .card {
-  background: var(--verde-card);
+  background: white;
   padding: 20px;
   margin-bottom: 15px;
   border-radius: 16px;
@@ -71,11 +53,11 @@
 }
 
 .button:hover {
-  background: var(--verde-detalhe);
+  background: #43a047;
 }
 
 .buttonSair {
-  background: var(--laranja);
+  background: #e53935;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -116,8 +98,7 @@
 }
 
 .adminCard {
-  background: var(--verde-principal);
-  ;
+  background: #f5f5f5;
   padding: 15px;
   border-radius: 12px;
   margin-top: 15px;

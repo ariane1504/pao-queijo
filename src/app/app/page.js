@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 import { supabase } from "./lib/supabase";
@@ -22,7 +22,7 @@ export default function Login() {
     const user = usuario.trim().toLowerCase();
 
     if (!user || !senha) {
-      alert("Preencha usuario e senha");
+      alert("Preencha usuário e senha");
       return;
     }
 
@@ -42,7 +42,7 @@ export default function Login() {
       .single();
 
     if (error || !data) {
-      alert("Usuario ou senha invalidos");
+      alert("Usuário ou senha inválidos");
       return;
     }
 
@@ -68,13 +68,13 @@ export default function Login() {
     return (
       <main className={styles.body}>
         <div className={styles.loginCard}>
-          <h1>Pao de Queijo com Cafe</h1>
+          <h1>Pão de Queijo com Café</h1>
           <p>Sistema interno</p>
 
           <input
             className={styles.input}
             type="text"
-            placeholder="Usuario"
+            placeholder="Usuário"
             value={usuario}
             onChange={(e) => setUsuario(e.target.value)}
           />
@@ -95,93 +95,64 @@ export default function Login() {
     );
   }
 
-  const inicialUsuario = dadosUsuario.nome?.charAt(0)?.toUpperCase() || "P";
-  const dataAtual = new Date().toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-  });
-
   return (
     <main className={styles.body}>
-      <header className={styles.header}>
-        <div className={styles.brandArea}>
-          <div className={styles.brandIcon}>PQ</div>
-
-          <div>
-            <span className={styles.kicker}>Sistema interno</span>
-            <h1>Pao de Queijo com Cafe</h1>
-            <p>
-              Ola, <strong>{dadosUsuario.nome}</strong>. Bom trabalho por aqui.
-            </p>
-          </div>
+      <div className={styles.header}>
+        <div>
+          <h1>👋 {dadosUsuario.nome}</h1>
+          <p>Função: {dadosUsuario.funcao}</p>
         </div>
 
-        <div className={styles.headerActions}>
-          <div className={styles.userBadge}>
-            <span className={styles.avatar}>{inicialUsuario}</span>
-
-            <div>
-              <strong>{dadosUsuario.funcao}</strong>
-              <small>{dataAtual}</small>
-            </div>
-          </div>
-
-          {dadosUsuario.funcao === "admin" && (
-            <Link href="/admin" className={styles.adminShortcut}>
-              Admin
-            </Link>
-          )}
-
-          <button className={styles.sair} onClick={sair}>
-            Sair
-          </button>
-        </div>
-      </header>
+        <button className={styles.sair} onClick={sair}>
+          Sair
+        </button>
+      </div>
 
       <div className={styles.grid}>
+      
+
         <Link href="/escalas" className={styles.card}>
-          <h2>Escala</h2>
+          <h2>📋 Escala</h2>
           <p>Tarefas da equipe</p>
         </Link>
 
         <Link href="/estoque" className={styles.card}>
-          <h2>Estoque</h2>
+          <h2>📦 Estoque</h2>
           <p>Produtos da padaria</p>
         </Link>
 
         <Link href="/limpeza" className={styles.card}>
-          <h2>Limpeza</h2>
+          <h2>🧼 Limpeza</h2>
           <p>Controle de limpeza</p>
         </Link>
 
         {dadosUsuario.funcao !== "atendente" && (
           <Link href="/producao" className={styles.card}>
-            <h2>Producao</h2>
-            <p>Producao diaria</p>
+            <h2>🥖 Produção</h2>
+            <p>Produção semanal</p>
           </Link>
         )}
 
         {dadosUsuario.funcao !== "padeiro" && (
           <Link href="/caixa" className={styles.card}>
-            <h2>Caixa</h2>
+            <h2>💰 Caixa</h2>
             <p>Controle financeiro</p>
           </Link>
         )}
 
         <Link href="/encomenda" className={styles.card}>
-          <h2>Encomendas</h2>
+          <h2>📦 Encomendas</h2>
           <p>Encomendas clientes</p>
         </Link>
 
         <Link href="/pedidos" className={styles.card}>
-          <h2>Pedidos</h2>
+          <h2>📦 pedidos</h2>
           <p>Pedidos filiais para Matriz</p>
         </Link>
 
         {dadosUsuario.funcao === "admin" && (
           <Link href="/admin" className={styles.cardAdmin}>
-            <h2>Admin</h2>
+            <h2>👑 Admin</h2>
             <p>Painel administrativo</p>
           </Link>
         )}

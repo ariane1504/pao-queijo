@@ -130,7 +130,7 @@ export default function Encomendas() {
 
       {/* PENDENTES */}
       <div className={styles.card}>
-        <h2>🟡 Situação ({pendentes.length})</h2>
+        <h2>🟡 Em andamento ({pendentes.length})</h2>
         {pendentes.length === 0 && <p>Nenhuma encomenda pendente.</p>}
         {pendentes.map((enc) => (
           <div key={enc.id} style={{ borderLeft: "5px solid #ff9800", background: "#fff9f0", borderRadius: "12px", padding: "14px", marginTop: "12px" }}>

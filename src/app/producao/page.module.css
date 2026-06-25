@@ -1,0 +1,160 @@
+:root{
+  --fundo: #F7F4EC;
+
+  --laranja-principal: #F59E0B;
+  --laranja-card: #ffba6a;
+  --laranja-detalhe: #FEF3C7;
+
+  --marrom: #5A3214;
+
+  --laranja: #E97825;
+  --laranja-hover: #D56413;
+
+  --cinza: #666;
+  --branco: #FFFFFF;
+}
+
+
+
+.body {
+  background: var(--fundo);
+  min-height: 100vh;
+  padding: 15px;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+}
+
+.card {
+  background: var(--laranja-card);
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.statusSelect {
+  width: 100%;
+  max-width: 180px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 12px;
+  background: #5e35b1;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+}
+
+.statusSelect option {
+  background: white;
+  color: #333;
+}
+
+.input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-top: 8px;
+  font-size: 16px;
+}
+
+.labelData {
+  font-weight: bold;
+  color: #444;
+}
+
+.buttonSair {
+  background: #e53935;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.item,
+.itemResumo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #e8f5e9;
+  padding: 14px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.itemResumo {
+  background: #f5f5f5;
+  border-left: 5px solid #4CAF50;
+}
+
+.porcentagem,
+.status {
+  background: #5e35b1;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.textoProgresso {
+  font-weight: bold;
+  margin: 14px 0 0;
+}
+
+.alertaCard {
+  border-left: 6px solid #ef5350;
+  background: #fff7f7;
+}
+
+.alertaCard h3 {
+  color: #c62828;
+  margin-top: 0;
+}
+
+.alertaCard p {
+  color: #9f1d1d;
+}
+
+.encomenda {
+  background: #fff9f0;
+  border-left: 5px solid #ff9800;
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.encomenda p {
+  margin: 6px 0;
+}
+
+@media (max-width: 600px) {
+  .topo,
+  .item,
+  .itemResumo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .buttonSair {
+    width: 100%;
+  }
+
+  .porcentagem,
+  .status {
+    white-space: normal;
+  }
+}

@@ -1,0 +1,103 @@
+.body {
+  background: #f3f5f7;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.header {
+  background: linear-gradient(135deg, #1e88e5, #1565c0);
+
+  color: white;
+
+  padding: 25px;
+  border-radius: 22px;
+
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.card {
+  background: white;
+
+  padding: 20px;
+  border-radius: 20px;
+
+  margin-bottom: 20px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.input {
+  width: 100%;
+
+  padding: 14px;
+  margin-top: 12px;
+
+  border-radius: 12px;
+  border: 1px solid #ccc;
+
+  font-size: 15px;
+}
+
+.button {
+  width: 100%;
+
+  padding: 14px;
+  margin-top: 15px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #43a047;
+  color: white;
+
+  font-weight: bold;
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #388e3c;
+}
+
+.lista {
+  margin-top: 25px;
+}
+
+.item {
+  background: #fafafa;
+
+  padding: 16px;
+  border-radius: 16px;
+
+  margin-bottom: 15px;
+
+  border-left: 6px solid #1e88e5;
+}
+
+.item h3 {
+  margin-top: 0;
+}
+
+.total {
+  margin-top: 20px;
+
+  background: #e3f2fd;
+
+  padding: 15px;
+  border-radius: 14px;
+
+  font-size: 18px;
+}
+
+@media (max-width: 700px) {
+
+  .body {
+    padding: 15px;
+  }
+
+}

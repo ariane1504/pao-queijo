@@ -95,7 +95,9 @@ export default function Limpeza() {
           <span>
             {porcentagem}%
           </span>
-         
+          <Link href="/" className={styles["btnvoltar"]}>
+            Voltar para Home
+          </Link>
 
         </div>
 

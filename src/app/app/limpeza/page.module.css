@@ -1,23 +1,5 @@
-:root {
-  --azul-principal: #2563EB;
-  --azul-escuro: #1E40AF;
-  --azul-claro: #DBEAFE;
-  --azul-detalhe: #a9c4f0;
-
-  --fundo: #F8FAFC;
-  --card: #FFFFFF;
-
-  --texto: #1F2937;
-  --texto-secundario: #6B7280;
-
-  --sucesso: #10B981;
-  --alerta: #F59E0B;
-  --erro: #EF4444;
-}
-
-
 .body {
-  background: var(--fundo);
+  background: #f4f6f9;
   min-height: 100vh;
   padding: 20px;
 }
@@ -27,8 +9,8 @@
 .header {
   background: linear-gradient(
     135deg,
-    var(--azul-principal),
-    var(--azul-escuro)
+    #26a69a,
+    #00897b
   );
 
   color: white;
@@ -46,13 +28,14 @@
 /* CARD */
 
 .card {
-  background: var(--azul-claro);
+  background: white;
+
   padding: 20px;
   border-radius: 20px;
 
   margin-bottom: 20px;
 
-  box-shadow: 0 4px 12px rgba(182, 41, 41, 0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 /* TOPO */
@@ -69,7 +52,7 @@
   width: 100%;
   height: 12px;
 
-  background: var(--azul-escuro);
+  background: #ddd;
 
   border-radius: 20px;
 
@@ -80,7 +63,7 @@
 .barra {
   height: 12px;
 
-  background: var(--azul-principal);
+  background: #26a69a;
 
   border-radius: 20px;
 }
@@ -98,7 +81,7 @@
   align-items: center;
   gap: 12px;
 
-  background: var(--azul-detalhe);
+  background: #fafafa;
 
   padding: 15px;
   border-radius: 14px;
