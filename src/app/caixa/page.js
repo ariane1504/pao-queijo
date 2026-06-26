@@ -136,32 +136,8 @@ export default function Caixa() {
       </div>
 
       {/* HISTÓRICO */}
-      <div className={styles.card}>
-        <h2>📅 Histórico de Caixas</h2>
-        {loading && <p>Carregando...</p>}
-        {historico.map((cx) => {
-          const total = Number(cx.dinheiro || 0) + Number(cx.pix || 0) + Number(cx.debito || 0) + Number(cx.credito || 0) + Number(cx.alimentacao || 0) + Number(cx.delivery || 0);
-          return (
-            <div key={cx.id} style={{
-              background: "#f9f9f9", borderRadius: "14px",
-              padding: "14px", marginTop: "12px",
-              borderLeft: "5px solid #1565c0"
-            }}>
-              <strong>📅 {cx.data}</strong>
-              <p>💵 Dinheiro: R$ {Number(cx.dinheiro || 0).toFixed(2)}</p>
-              <p>📱 Pix: R$ {Number(cx.pix || 0).toFixed(2)}</p>
-              <p>💳 Débito: R$ {Number(cx.debito || 0).toFixed(2)}</p>
-              <p>💳 Crédito: R$ {Number(cx.credito || 0).toFixed(2)}</p>
-              {cx.alimentacao > 0 && <p>🍔 Alimentação: R$ {Number(cx.alimentacao).toFixed(2)}</p>}
-              {cx.delivery > 0 && <p>🛵 Delivery: R$ {Number(cx.delivery).toFixed(2)}</p>}
-              <p><strong>Total: R$ {total.toFixed(2)}</strong></p>
-              {cx.declarado > 0 && <p>🧾 Declarado: R$ {Number(cx.declarado).toFixed(2)}</p>}
-              {cx.conferido > 0 && <p>✅ Conferido: R$ {Number(cx.conferido).toFixed(2)}</p>}
-              {cx.observacao && <p>📝 {cx.observacao}</p>}
-            </div>
-          );
-        })}
-      </div>
+     
+          
 
     </main>
   );
