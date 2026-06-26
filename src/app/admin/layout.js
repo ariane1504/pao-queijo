@@ -48,6 +48,14 @@ export default function AdminLayout({
             📦 Pedidos
           </Link>
 
+          
+          <Link
+            href="/admin/reclamacao"
+            className={styles.link}
+          >
+            � Reclamações
+          </Link>
+
           <Link
             href="/admin/estoque"
             className={styles.link}

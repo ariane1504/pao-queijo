@@ -1,38 +1,22 @@
-:root{
-  --fundo: #F7F4EC;
-
-  --laranja-principal: #F59E0B;
-  --laranja-card: #ffba6a;
-  --laranja-detalhe: #FEF3C7;
-
-  --marrom: #5A3214;
-
-  --laranja: #E97825;
-  --laranja-hover: #D56413;
-
-  --cinza: #666;
-  --branco: #FFFFFF;
-}
-
-
-
 .body {
-  background: var(--fundo);
   min-height: 100vh;
-  padding: 15px;
+  padding: 20px;
+  background: radial-gradient(circle at top left, #fffdf8, var(--pq-creme));
 }
 
 .container {
-  max-width: 700px;
+  max-width: 820px;
   margin: auto;
 }
 
-.card {
-  background: var(--laranja-card);
-  padding: 20px;
-  margin-bottom: 15px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+.card,
+.alertaCard {
+  margin-bottom: 16px;
+  padding: 22px;
+  border-radius: 20px;
+  background: var(--pq-card);
+  border: 1px solid var(--pq-borda);
+  box-shadow: var(--pq-sombra);
 }
 
 .topo {
@@ -44,43 +28,52 @@
 
 .statusSelect {
   width: 100%;
-  max-width: 180px;
+  max-width: 190px;
   padding: 10px 12px;
   border: none;
   border-radius: 12px;
-  background: #5e35b1;
+  background: var(--pq-laranja);
   color: white;
-  font-weight: bold;
+  font-weight: 800;
   cursor: pointer;
   outline: none;
 }
 
 .statusSelect option {
   background: white;
-  color: #333;
+  color: var(--pq-texto);
 }
 
 .input {
   width: 100%;
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
   margin-top: 8px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(90, 50, 20, 0.2);
+  background: white;
+  color: var(--pq-texto);
   font-size: 16px;
 }
 
+.input:focus {
+  outline: none;
+  border-color: var(--pq-laranja);
+  box-shadow: 0 0 0 4px rgba(242, 106, 33, 0.16);
+}
+
 .labelData {
-  font-weight: bold;
-  color: #444;
+  color: var(--pq-marrom);
+  font-weight: 800;
 }
 
 .buttonSair {
-  background: #e53935;
-  color: white;
   border: none;
+  border-radius: 12px;
+  background: var(--pq-marrom);
+  color: white;
   padding: 10px 16px;
-  border-radius: 10px;
   cursor: pointer;
+  font-weight: 800;
 }
 
 .item,
@@ -89,52 +82,54 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  background: #e8f5e9;
-  padding: 14px;
-  border-radius: 10px;
   margin-top: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--pq-verde-suave);
+  border-left: 5px solid var(--pq-verde);
 }
 
 .itemResumo {
-  background: #f5f5f5;
-  border-left: 5px solid #4CAF50;
+  background: white;
+  border-left-color: var(--pq-laranja);
 }
 
 .porcentagem,
 .status {
-  background: #5e35b1;
-  color: white;
   padding: 10px 14px;
   border-radius: 14px;
-  font-weight: bold;
+  background: var(--pq-laranja);
+  color: white;
+  font-weight: 800;
   white-space: nowrap;
 }
 
 .textoProgresso {
-  font-weight: bold;
   margin: 14px 0 0;
+  color: var(--pq-marrom);
+  font-weight: 800;
 }
 
 .alertaCard {
-  border-left: 6px solid #ef5350;
-  background: #fff7f7;
+  border-left: 6px solid #e5483f;
+  background: #fff7f4;
 }
 
 .alertaCard h3 {
-  color: #c62828;
   margin-top: 0;
+  color: #b42318;
 }
 
 .alertaCard p {
-  color: #9f1d1d;
+  color: #8f1f16;
 }
 
 .encomenda {
-  background: #fff9f0;
-  border-left: 5px solid #ff9800;
-  border-radius: 14px;
-  padding: 14px;
   margin-top: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--pq-laranja-suave);
+  border-left: 5px solid var(--pq-laranja);
 }
 
 .encomenda p {
@@ -142,6 +137,10 @@
 }
 
 @media (max-width: 600px) {
+  .body {
+    padding: 15px;
+  }
+
   .topo,
   .item,
   .itemResumo {

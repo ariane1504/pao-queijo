@@ -1,86 +1,79 @@
-:root{
-  --fundo: #F7F4EC;
-
-  --verde-principal: #A5B96A;
-  --verde-card: #FDFBF7;
-  --verde-detalhe: #6E8B55;
-
-  --marrom: #5A3214;
-
-  --laranja: #E97825;
-  --laranja-hover: #D56413;
-
-  --cinza: #666;
-  --branco: #FFFFFF;
-  --texto: #2B2B2B;
-}
-
-
 .body {
-  background: var(--fundo);
   min-height: 100vh;
-  padding: 15px;
+  padding: 20px;
+  background: radial-gradient(circle at top left, #fffdf8, var(--pq-creme));
 }
 
 .container {
-  max-width: 600px;
+  max-width: 760px;
   margin: auto;
 }
 
-.card {
-  background: var(--verde-card);
-  padding: 20px;
-  margin-bottom: 15px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+.card,
+.adminCard {
+  margin-bottom: 16px;
+  padding: 22px;
+  border-radius: 20px;
+  background: var(--pq-card);
+  border: 1px solid var(--pq-borda);
+  box-shadow: var(--pq-sombra);
 }
 
 .titulo {
   margin-bottom: 20px;
+  color: var(--pq-marrom);
 }
 
-.input {
+.input,
+.textarea {
   width: 100%;
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
   margin-bottom: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(90, 50, 20, 0.2);
+  background: white;
+  color: var(--pq-texto);
   font-size: 16px;
 }
 
 .textarea {
-  width: 100%;
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  margin-bottom: 12px;
-  resize: none;
-  font-size: 16px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--pq-laranja);
+  box-shadow: 0 0 0 4px rgba(242, 106, 33, 0.16);
+}
+
+.button,
+.buttonSair {
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  font-weight: 800;
+  transition: 0.2s;
 }
 
 .button {
   width: 100%;
   padding: 14px;
-  border: none;
-  border-radius: 10px;
-  background: #4CAF50;
-  color: white;
+  background: var(--pq-laranja);
   font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.button:hover {
-  background: var(--verde-detalhe);
 }
 
 .buttonSair {
-  background: var(--laranja);
-  color: white;
-  border: none;
   padding: 10px 16px;
-  border-radius: 10px;
-  cursor: pointer;
+  background: var(--pq-marrom);
+}
+
+.button:hover,
+.buttonSair:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.95);
 }
 
 .topo {
@@ -91,43 +84,39 @@
 }
 
 .item {
-  background: #e8f5e9;
-  padding: 14px;
-  border-radius: 10px;
   margin-bottom: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--pq-verde-suave);
+  border-left: 5px solid var(--pq-verde);
 }
 
 .progresso {
   width: 100%;
   height: 14px;
-  background: #ddd;
+  background: #eadfce;
   border-radius: 10px;
   overflow: hidden;
 }
 
 .barra {
   height: 100%;
-  background: #4CAF50;
+  background: var(--pq-laranja);
 }
 
 .textoProgresso {
-  font-weight: bold;
   margin: 12px 0;
+  font-weight: 800;
+  color: var(--pq-marrom);
 }
 
 .adminCard {
-  background: var(--verde-principal);
-  ;
-  padding: 15px;
-  border-radius: 12px;
-  margin-top: 15px;
+  background: var(--pq-verde-suave);
 }
 
 @media (max-width: 600px) {
-
   .topo {
     flex-direction: column;
     align-items: stretch;
   }
-
 }

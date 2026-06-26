@@ -1,0 +1,259 @@
+:root {
+  --verde-claro: #a4b86a;
+  --verde-escuro: #39540d;
+  --laranja: #f26a21;
+  --laranja-hover: #dd5a15;
+  --marrom: #5a3214;
+  --creme: #fdf8f0;
+  --texto: #2b2b2b;
+}
+
+.body {
+  min-height: 100vh;
+  padding: 20px;
+  background: radial-gradient(circle at top left, #fffdf8, var(--creme));
+  color: var(--texto);
+}
+
+.hero {
+  margin-bottom: 22px;
+  padding: 26px;
+  border-radius: 24px;
+  color: white;
+  background: linear-gradient(135deg, var(--verde-escuro), var(--verde-claro));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.hero h1 {
+  margin: 8px 0;
+  font-size: 34px;
+  line-height: 1.1;
+}
+
+.hero p {
+  max-width: 720px;
+  margin: 0;
+  line-height: 1.5;
+  opacity: 0.92;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.form,
+.feed {
+  background: #fffdf8;
+  border: 2px solid rgba(164, 184, 106, 0.2);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.form h2,
+.feed h2 {
+  margin: 0;
+  color: var(--marrom);
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.form label {
+  display: grid;
+  gap: 7px;
+  color: var(--marrom);
+  font-weight: 800;
+}
+
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  border: 2px solid rgba(164, 184, 106, 0.28);
+  border-radius: 14px;
+  padding: 13px;
+  background: white;
+  color: var(--texto);
+  font: inherit;
+}
+
+.form textarea {
+  min-height: 150px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+  outline: none;
+  border-color: var(--laranja);
+  box-shadow: 0 0 0 4px rgba(242, 106, 33, 0.18);
+}
+
+.form button,
+.feedHeader button {
+  border: none;
+  border-radius: 14px;
+  padding: 13px 18px;
+  background: var(--laranja);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.form button:hover,
+.feedHeader button:hover {
+  background: var(--laranja-hover);
+  transform: translateY(-2px);
+}
+
+.form button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.feedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.feedHeader .kicker {
+  margin-bottom: 8px;
+  background: rgba(164, 184, 106, 0.22);
+  color: var(--verde-escuro);
+}
+
+.posts {
+  display: grid;
+  gap: 14px;
+}
+
+.post {
+  padding: 18px;
+  border-radius: 18px;
+  background: white;
+  border: 1px solid rgba(90, 50, 20, 0.12);
+}
+
+.postMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.postMeta span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(242, 106, 33, 0.12);
+  color: var(--laranja-hover);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.postMeta small {
+  color: #666;
+  font-weight: 800;
+}
+
+.post h3 {
+  margin: 0 0 8px;
+  color: var(--marrom);
+  font-size: 22px;
+}
+
+.post p {
+  margin: 0;
+  color: #555;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.post footer {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(90, 50, 20, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--marrom);
+}
+
+.post footer span {
+  color: #777;
+  text-transform: capitalize;
+}
+
+.warning,
+.empty {
+  margin: 0;
+  padding: 16px;
+  border-radius: 16px;
+  line-height: 1.45;
+}
+
+.warning {
+  color: #7a2f0f;
+  background: rgba(242, 106, 33, 0.12);
+}
+
+.empty {
+  color: #666;
+  background: rgba(164, 184, 106, 0.14);
+}
+
+@media (max-width: 900px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .body {
+    padding: 15px;
+  }
+
+  .hero {
+    padding: 22px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+  }
+
+  .feedHeader,
+  .postMeta,
+  .post footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .feedHeader button {
+    width: 100%;
+  }
+}

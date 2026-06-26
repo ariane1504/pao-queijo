@@ -1,18 +1,16 @@
 .body {
-  background: #f3f5f7;
   min-height: 100vh;
   padding: 20px;
+  background: radial-gradient(circle at top left, #fffdf8, var(--pq-creme));
 }
 
 .header {
-  background: linear-gradient(135deg, #1e88e5, #1565c0);
-
-  color: white;
-
+  margin-bottom: 22px;
   padding: 25px;
   border-radius: 22px;
-
-  margin-bottom: 20px;
+  color: white;
+  background: linear-gradient(135deg, var(--pq-verde-escuro), var(--pq-verde));
+  box-shadow: var(--pq-sombra);
 }
 
 .header h1 {
@@ -20,48 +18,48 @@
 }
 
 .card {
-  background: white;
-
-  padding: 20px;
-  border-radius: 20px;
-
   margin-bottom: 20px;
-
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 22px;
+  border-radius: 20px;
+  background: var(--pq-card);
+  border: 1px solid var(--pq-borda);
+  box-shadow: var(--pq-sombra);
 }
 
 .input {
   width: 100%;
-
-  padding: 14px;
   margin-top: 12px;
-
+  padding: 14px;
   border-radius: 12px;
-  border: 1px solid #ccc;
-
+  border: 1px solid rgba(90, 50, 20, 0.2);
+  background: white;
+  color: var(--pq-texto);
   font-size: 15px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--pq-laranja);
+  box-shadow: 0 0 0 4px rgba(242, 106, 33, 0.16);
 }
 
 .button {
   width: 100%;
-
-  padding: 14px;
   margin-top: 15px;
-
+  padding: 14px;
   border: none;
   border-radius: 12px;
-
-  background: #43a047;
+  background: var(--pq-laranja);
   color: white;
-
-  font-weight: bold;
+  font-weight: 800;
   font-size: 15px;
-
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .button:hover {
-  background: #388e3c;
+  background: var(--pq-laranja-hover);
+  transform: translateY(-1px);
 }
 
 .lista {
@@ -69,35 +67,31 @@
 }
 
 .item {
-  background: #fafafa;
-
+  margin-bottom: 15px;
   padding: 16px;
   border-radius: 16px;
-
-  margin-bottom: 15px;
-
-  border-left: 6px solid #1e88e5;
+  background: white;
+  border-left: 6px solid var(--pq-verde);
+  box-shadow: 0 4px 14px rgba(90, 50, 20, 0.08);
 }
 
 .item h3 {
   margin-top: 0;
+  color: var(--pq-marrom);
 }
 
 .total {
   margin-top: 20px;
-
-  background: #e3f2fd;
-
-  padding: 15px;
-  border-radius: 14px;
-
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--pq-verde-suave);
+  color: var(--pq-verde-escuro);
   font-size: 18px;
+  font-weight: 800;
 }
 
 @media (max-width: 700px) {
-
   .body {
     padding: 15px;
   }
-
 }

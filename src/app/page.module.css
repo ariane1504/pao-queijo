@@ -374,6 +374,67 @@
 }
 
 /* ======================
+   FOOTER
+====================== */
+
+.footer {
+  margin-top: 26px;
+  padding: 22px;
+  border-radius: 22px;
+  background: #fffdf8;
+  border: 2px solid rgba(242, 106, 33, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.footer strong {
+  display: block;
+  color: var(--marrom);
+  font-size: 20px;
+}
+
+.footer p {
+  margin: 6px 0 0;
+  color: #666;
+  line-height: 1.4;
+}
+
+.footerButton {
+  flex: 0 0 auto;
+  background: var(--laranja);
+  color: white;
+  text-decoration: none;
+  border-radius: 14px;
+  padding: 13px 18px;
+  font-weight: 800;
+  transition: 0.2s;
+}
+
+.footerButton:hover {
+  background: var(--laranja-hover);
+  transform: translateY(-2px);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  font-size: 15px;
+  outline: none;
+}
+
+.textarea:focus {
+  border-color: #2e7d32;
+}
+
+/* ======================
    RESPONSIVO
 ====================== */
 
@@ -426,5 +487,15 @@
 
   .loginCard h1 {
     font-size: 28px;
+  }
+
+  .footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .footerButton {
+    text-align: center;
+    width: 100%;
   }
 }
